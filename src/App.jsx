@@ -4,6 +4,7 @@ import { Layout, Menu, ConfigProvider, Button } from 'antd';
 import { DashboardOutlined, UserOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import TransactionsPage from './pages/TransactionsPage';
 import DashboardPage from './pages/DashboardPage';
+import ItemAvailabilityPage from './pages/ItemAvailabilityPage';
 import { modernTheme } from './theme';
 
 const { Header, Sider, Content } = Layout;
@@ -17,6 +18,11 @@ const AppLayout = () => {
       key: '/',
       icon: <DashboardOutlined />,
       label: <Link to="/">Dashboard</Link>,
+    },
+    {
+      key: '/availability',
+      icon: <UnorderedListOutlined />,
+      label: <Link to="/availability">Item Availability</Link>,
     },
     {
       key: '/transactions',
@@ -59,6 +65,7 @@ const AppLayout = () => {
         <Content style={{ margin: '0 32px 32px 32px', overflowY: 'auto' }}>
           <Routes>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/availability" element={<ItemAvailabilityPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
           </Routes>
         </Content>
