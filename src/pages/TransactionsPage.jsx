@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Tag, Badge, Input, Button, Card, message } from 'antd';
-import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Table, Tag, Input, Button, Card, message, Typography, Space, Tooltip, Spin } from 'antd';
+import {
+  SearchOutlined,
+  EyeOutlined,
+  ReloadOutlined,
+  TransactionOutlined,
+} from '@ant-design/icons';
 import api from '../api';
 import OrderDetailsDrawer from '../components/OrderDetailsDrawer';
+import { formatIst, formatInr, getKotCode, getOrderType, getPaymentType } from '../utils/orderFields';
+import { useDashboardPeriod } from '../context/DashboardPeriodContext';
+
+const { Title, Text } = Typography;
 
 const TransactionsPage = () => {
+  const { period, periodLabel } = useDashboardPeriod();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
@@ -14,64 +24,50 @@ const TransactionsPage = () => {
   const [sortField, setSortField] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
 
-  const fetchData = async (page = 1, pageSize = 20, search = '', sort = 'created_at', dir = 'desc') => {
-    setLoading(true);
-    try {
-      if (search) {
-        // Search by ID using the detail endpoint as requested
-        try {
-          const response = await api.get(`/orders/${search}`);
-          // The endpoint returns a single object, wrap it in array
-          setData([response.data]);
-          setPagination({
-            current: 1,
-            pageSize: 20, // arbitrary
-            total: 1
-          });
-        } catch (error) {
-          // If 404 or other error, likely not found
-          console.warn("Search failed", error);
-          setData([]);
-          setPagination({ current: 1, pageSize: 20, total: 0 });
-          if (error.response && error.response.status === 404) {
-            message.warning("Order not found");
-          }
-        }
-      } else {
-        // Normal list fetch
+  const fetchData = useCallback(
+    async (page = 1, pageSize = 20, search = '', sort = 'created_at', dir = 'desc') => {
+      setLoading(true);
+      try {
         const params = {
-          page: page - 1, // API is 0-indexed
+          page: page - 1,
           size: pageSize,
           sortBy: sort,
           sortDir: dir,
+          status: 'COMPLETED',
+          period,
         };
+        if (search && String(search).trim()) {
+          params.search = String(search).trim();
+        }
         const response = await api.get('/orders', { params });
-        setData(response.data.content);
+        setData(response.data.content || []);
         setPagination({
           current: page,
-          pageSize: pageSize,
-          total: response.data.totalElements
+          pageSize,
+          total: response.data.totalElements ?? 0,
         });
+      } catch (error) {
+        console.error('Fetch orders failed', error);
+        message.error('Failed to fetch orders');
+        setData([]);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Fetch orders failed", error);
-      message.error("Failed to fetch orders");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [period]
+  );
 
   useEffect(() => {
     fetchData(1, pagination.pageSize, searchText, sortField, sortOrder);
-  }, [searchText]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: refetch when period/search changes; sort & page size handled via table onChange
+  }, [searchText, period, fetchData]);
 
-  const handleTableChange = (newPagination, filters, sorter) => {
-    // We only fetch new data on pagination or sorting changes,
-    // filtering is local (onFilter) so we don't reload from server for it.
-
-    // Check if pagination/sort actually changed or if it's just a filter event
-    const sortChanged = sorter.field !== sortField || (sorter.order === 'ascend' ? 'asc' : 'desc') !== sortOrder;
-    const pageChanged = newPagination.current !== pagination.current || newPagination.pageSize !== pagination.pageSize;
+  const handleTableChange = (newPagination, _filters, sorter) => {
+    const sortChanged =
+      sorter.field !== sortField || (sorter.order === 'ascend' ? 'asc' : 'desc') !== sortOrder;
+    const pageChanged =
+      newPagination.current !== pagination.current ||
+      newPagination.pageSize !== pagination.pageSize;
 
     if (sortChanged || pageChanged) {
       const field = sorter.field || 'created_at';
@@ -86,101 +82,179 @@ const TransactionsPage = () => {
     {
       title: 'Order ID',
       dataIndex: 'orderRefId',
-      key: 'order_id', // sort key
+      key: 'orderRefId',
+      width: 200,
+      render: (id) => (
+        <Text
+          strong
+          style={{
+            fontSize: '13px',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            color: '#0F172A',
+          }}
+        >
+          {id}
+        </Text>
+      ),
     },
     {
-      title: 'Location',
-      dataIndex: 'location',
-      key: 'location',
+      title: 'KOT code',
+      key: 'kot',
+      width: 120,
+      render: (_, record) => (
+        <Text style={{ color: '#334155', fontSize: '13px' }}>{getKotCode(record)}</Text>
+      ),
     },
     {
       title: 'Date',
       dataIndex: 'createdAt',
-      key: 'created_at',
-      render: (text) => new Date(text).toLocaleString(),
+      key: 'createdAt',
+      width: 200,
+      render: (text) => <Text style={{ color: '#0F172A', fontSize: '13px' }}>{formatIst(text)}</Text>,
       sorter: true,
     },
     {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'total_amount', // sort key
-      align: 'right',
-      render: (amount) => `₹${Number(amount).toFixed(2)}`,
-      sorter: true,
-    },
-    {
-      title: 'Payment Status',
-      dataIndex: 'paymentStatus',
-      key: 'paymentStatus',
-      filters: [
-        { text: 'COMPLETED', value: 'COMPLETED' },
-        { text: 'PENDING', value: 'PENDING' },
-        { text: 'FAILED', value: 'FAILED' },
-      ],
-      onFilter: (value, record) => record.paymentStatus === value,
-      render: (status) => {
-        let badgeStatus = 'default';
-        if (status === 'COMPLETED') badgeStatus = 'success';
-        if (status === 'PENDING') badgeStatus = 'processing';
-        if (status === 'FAILED') badgeStatus = 'error';
-        return <Badge status={badgeStatus} text={status} />;
-      },
-    },
-    {
-      title: 'ERP Status',
-      dataIndex: 'erpStatus',
-      key: 'erpStatus',
-      filters: [
-        { text: 'POSTED', value: 'POSTED' },
-        { text: 'NOT_POSTED', value: 'NOT_POSTED' },
-        { text: 'FAILED', value: 'FAILED' },
-      ],
-      onFilter: (value, record) => record.erpStatus === value,
-      render: (status) => (
-        <Tag color={status === 'POSTED' ? 'success' : 'red'}>
-          {status}
+      title: 'Order type',
+      key: 'orderType',
+      width: 130,
+      render: (_, record) => (
+        <Tag
+          style={{
+            margin: 0,
+            background: 'rgba(99, 102, 241, 0.1)',
+            border: '1px solid rgba(99, 102, 241, 0.2)',
+            color: '#4F46E5',
+            borderRadius: 6,
+            fontWeight: 600,
+            fontSize: '12px',
+          }}
+        >
+          {getOrderType(record)}
         </Tag>
       ),
     },
     {
-      title: 'Action',
+      title: 'Payment type',
+      key: 'paymentType',
+      width: 130,
+      render: (_, record) => (
+        <Text style={{ color: '#64748B', fontSize: '13px', fontWeight: 600 }}>
+          {getPaymentType(record)}
+        </Text>
+      ),
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      align: 'right',
+      width: 120,
+      render: (amount) => (
+        <Text strong style={{ color: '#0F172A', fontSize: '14px' }}>
+          {formatInr(amount)}
+        </Text>
+      ),
+      sorter: true,
+    },
+    {
+      title: '',
       key: 'action',
+      width: 140,
+      align: 'right',
       render: (_, record) => (
         <Button
-          type="link"
+          type="primary"
           icon={<EyeOutlined />}
           onClick={() => {
-            setSelectedOrder(record); // Pass the summary object, Drawer will fetch details if needed
+            setSelectedOrder(record);
             setDrawerOpen(true);
           }}
+          style={{ borderRadius: 8, fontWeight: 600 }}
         >
-          View
+          View details
         </Button>
       ),
     },
   ];
 
   return (
-    <div style={{ paddingBottom: 24 }}>
-      <Card bordered={false} title="Transaction History" extra={
-        <Input
-          placeholder="Search Order ID"
-          prefix={<SearchOutlined />}
-          onPressEnter={e => setSearchText(e.target.value)}
-          onChange={e => { if (!e.target.value) setSearchText('') }} // clear search
-          style={{ width: 300, backgroundColor: '#fff', color: '#000' }}
-        />
-      }>
-        <Table
-          columns={columns}
-          dataSource={data}
-          rowKey="orderRefId"
-          pagination={pagination}
-          loading={loading}
-          onChange={handleTableChange}
-          rowClassName={(record) => record.paymentStatus === 'PENDING' ? 'bg-warning-dim' : ''}
-        />
-      </Card>
+    <div className="animate-fade-in" style={{ paddingBottom: 24 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          marginBottom: 24,
+          flexWrap: 'wrap',
+          gap: 16,
+        }}
+      >
+        <div>
+          <Space align="center" style={{ marginBottom: 4 }}>
+            <TransactionOutlined style={{ color: '#6366F1' }} />
+            <Text
+              style={{
+                color: '#6366F1',
+                fontWeight: 800,
+                fontSize: '12px',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+              }}
+            >
+              Orders
+            </Text>
+          </Space>
+          <Title level={2} style={{ margin: 0, color: '#0F172A', fontSize: '28px', fontWeight: 800 }}>
+            Transactions
+          </Title>
+          <Text type="secondary">
+            Paid orders only · same period as the header: <strong>{periodLabel}</strong> (IST). Search by order ID.
+          </Text>
+        </div>
+
+        <Space size={16} wrap>
+          <Input
+            placeholder="Search order ID…"
+            prefix={<SearchOutlined style={{ color: '#94A3B8' }} />}
+            allowClear
+            style={{
+              width: 320,
+              height: 44,
+              borderRadius: 10,
+            }}
+            onPressEnter={(e) => setSearchText(e.target.value)}
+            onChange={(e) => {
+              if (!e.target.value) setSearchText('');
+            }}
+          />
+          <Tooltip title="Refresh">
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() =>
+                fetchData(pagination.current, pagination.pageSize, searchText, sortField, sortOrder)
+              }
+              style={{ height: 44, width: 44, borderRadius: 10 }}
+            />
+          </Tooltip>
+        </Space>
+      </div>
+
+      <Spin spinning={loading} delay={120}>
+        <Card className="premium-card" styles={{ body: { padding: 8 } }}>
+          <Table
+            columns={columns}
+            dataSource={data}
+            rowKey="orderRefId"
+            pagination={{
+              ...pagination,
+              style: { marginRight: 16 },
+              showSizeChanger: true,
+            }}
+            onChange={handleTableChange}
+            scroll={{ x: 960 }}
+          />
+        </Card>
+      </Spin>
 
       <OrderDetailsDrawer
         open={drawerOpen}

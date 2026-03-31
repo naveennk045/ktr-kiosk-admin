@@ -1,36 +1,56 @@
 import { theme } from 'antd';
 
+/** Soft light theme — off-white surfaces, slate text, violet accent (not pure #FFF everywhere). */
 export const modernTheme = {
-  algorithm: theme.defaultAlgorithm, // Light mode
+  algorithm: theme.defaultAlgorithm,
   token: {
-    colorPrimary: '#6C5DD3', // Keep vibrant purple as primary
-    colorBgBase: '#ffffff', // White base
-    colorBgContainer: '#ffffff', // White containers
-    colorBgLayout: '#F4F5F7', // Light gray background for layout
-    borderRadius: 16,
-    fontFamily: 'Instrument Sans, Inter, system-ui, sans-serif',
-    colorTextHeading: '#1A1D1F', // Dark text for headings
-    colorText: '#1A1D1F', // Dark text for body
+    colorPrimary: '#6366F1',
+    colorBgBase: '#F1F5F9',
+    colorBgContainer: '#FFFFFF',
+    colorBgLayout: '#F1F5F9',
+    borderRadius: 12,
+    fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+    colorText: '#0F172A',
+    colorTextSecondary: '#64748B',
+    colorTextHeading: '#0F172A',
+    colorBorderSecondary: '#E2E8F0',
+    boxShadow: '0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.06)',
   },
   components: {
     Layout: {
-      bodyBg: '#F4F5F7',
-      siderBg: '#ffffff',
+      bodyBg: '#F1F5F9',
+      siderBg: '#FFFFFF',
+      headerBg: 'transparent',
     },
     Card: {
-      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)', // Soft shadow for cards
-      lineWidth: 0,
+      colorBgContainer: '#FFFFFF',
+      boxShadow: '0 1px 3px 0 rgb(15 23 42 / 0.06)',
+      lineWidth: 1,
+      colorBorderSecondary: '#E2E8F0',
     },
     Table: {
-      headerBg: '#FAFAFA',
-      headerColor: '#6F767E',
-      rowHoverBg: '#F4F5F7',
+      headerBg: '#F8FAFC',
+      headerColor: '#64748B',
+      rowHoverBg: '#F8FAFC',
+      colorBorderSecondary: '#EEF2F7',
     },
     Menu: {
-      itemBg: '#ffffff',
-      itemSelectedBg: '#F4F5F7',
-      itemColor: '#1A1D1F',
-      itemSelectedColor: '#6C5DD3',
-    }
+      itemBg: 'transparent',
+      itemSelectedBg: 'rgba(99, 102, 241, 0.08)',
+      itemColor: '#475569',
+      itemSelectedColor: '#4F46E5',
+      itemActiveBg: '#F1F5F9',
+      itemHoverBg: '#F8FAFC',
+    },
+    Button: {
+      borderRadius: 8,
+      controlHeight: 40,
+    },
+    Segmented: {
+      trackBg: '#EEF2F7',
+    },
+    Drawer: {
+      colorBgElevated: '#FFFFFF',
+    },
   },
 };

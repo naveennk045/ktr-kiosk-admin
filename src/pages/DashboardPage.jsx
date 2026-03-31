@@ -1,156 +1,319 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Typography, Spin, Avatar } from 'antd';
-import { CreditCardOutlined, ShoppingOutlined, WarningOutlined } from '@ant-design/icons';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { Card, Row, Col, Statistic, Typography, Spin, Space, Tag } from 'antd';
+import {
+  CreditCardOutlined,
+  ShoppingOutlined,
+  ArrowUpOutlined,
+  RocketFilled,
+  WalletOutlined,
+  BankOutlined,
+  QrcodeOutlined,
+} from '@ant-design/icons';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../api';
+import { useDashboardPeriod } from '../context/DashboardPeriodContext';
+import { formatInr } from '../utils/orderFields';
 
 const { Title, Text } = Typography;
 
 const DashboardPage = () => {
+  const { period, periodLabel } = useDashboardPeriod();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
 
-  // Mock data for charts
   const chartData = [
-    { name: '10 AM', orders: 4 }, { name: '11 AM', orders: 8 },
-    { name: '12 PM', orders: 15 }, { name: '1 PM', orders: 22 },
-    { name: '2 PM', orders: 14 }, { name: '3 PM', orders: 9 },
-    { name: '4 PM', orders: 12 }, { name: '5 PM', orders: 18 },
+    { name: '10 AM', orders: 4 },
+    { name: '11 AM', orders: 8 },
+    { name: '12 PM', orders: 15 },
+    { name: '1 PM', orders: 22 },
+    { name: '2 PM', orders: 14 },
+    { name: '3 PM', orders: 9 },
+    { name: '4 PM', orders: 12 },
+    { name: '5 PM', orders: 18 },
   ];
 
   useEffect(() => {
+    let cancelled = false;
     const fetchSummary = async () => {
+      setLoading(true);
       try {
-        const response = await api.get('/analytics/summary');
-        setSummary(response.data);
+        const response = await api.get('/analytics/summary', { params: { period } });
+        if (!cancelled) setSummary(response.data);
       } catch (err) {
-        console.error("Failed to fetch analytics", err);
-        setSummary({
-          totalRevenue: 42500.00,
-          totalOrders: 120,
-          pendingPayments: 3,
-          syncFailures: 5
-        });
+        console.error('Failed to fetch analytics', err);
+        if (!cancelled) setSummary(null);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     fetchSummary();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [period]);
 
-  const cardStyle = {
-    borderRadius: 16,
-    border: 'none',
-    overflow: 'hidden',
-    height: '100%',
-    color: '#1A1D1F', // Dark text
-    background: '#ffffff',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
-  };
-
-  const iconBoxStyle = {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    fontSize: 24,
-  }
-
-  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', marginTop: 100 }}><Spin size="large" /></div>;
+  const statTitle = (label) => (
+    <span style={{ color: '#64748B', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      {label}
+    </span>
+  );
 
   return (
-    <div style={{ padding: '0 0 24px 0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+    <Spin spinning={loading} delay={200}>
+    <div style={{ paddingBottom: 24 }}>
+      <div
+        className="glass-panel"
+        style={{
+          padding: '28px 32px',
+          borderRadius: 16,
+          marginBottom: 24,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16,
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(255, 255, 255, 0.95) 55%)',
+          border: '1px solid rgba(99, 102, 241, 0.15)',
+        }}
+      >
         <div>
-          <Title level={2} style={{ margin: 0, color: '#1A1D1F', fontSize: '28px', fontWeight: 700 }}>Dashboard</Title>
-          <Text style={{ color: '#6F767E' }}>Overview of your kiosk performance</Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ textAlign: 'right' }}>
-            <Text strong style={{ display: 'block', color: '#1A1D1F' }}>KTR Admin</Text>
-            <Text style={{ fontSize: '12px', color: '#6F767E' }}>Store Manager</Text>
-          </div>
-          <Avatar size={48} style={{ backgroundColor: '#F4F5F7', color: '#6C5DD3', border: '2px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>K</Avatar>
+          <Space align="center" style={{ marginBottom: 8 }} wrap>
+            <Tag
+              icon={<RocketFilled />}
+              color="processing"
+              style={{ borderRadius: 20, fontWeight: 700, border: 'none', padding: '2px 12px' }}
+            >
+              Live
+            </Tag>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              Period: <strong style={{ color: '#0F172A' }}>{periodLabel}</strong> (IST)
+            </Text>
+          </Space>
+          <Title level={2} style={{ margin: 0, color: '#0F172A', fontSize: 28, fontWeight: 800 }}>
+            Analytics overview
+          </Title>
+          <Text type="secondary" style={{ fontSize: 15 }}>
+            Completed orders only — revenue and payment mix for the selected window.
+          </Text>
         </div>
       </div>
 
-      <Row gutter={[24, 24]}>
-        {/* KPI Cards - Clean White Style */}
+      <Row gutter={[20, 20]}>
         <Col xs={24} sm={12} lg={6}>
-          <Card style={cardStyle} bordered={false}>
-            <div style={{ ...iconBoxStyle, background: 'rgba(108, 93, 211, 0.1)', color: '#6C5DD3' }}>
-              <span style={{ fontSize: 20 }}>₹</span>
+          <Card className="premium-card" styles={{ body: { padding: 22 } }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div
+                style={{
+                  background: 'rgba(99, 102, 241, 0.1)',
+                  color: '#6366F1',
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 20,
+                  fontWeight: 700,
+                }}
+              >
+                ₹
+              </div>
+              <Tag color="success" icon={<ArrowUpOutlined />} style={{ borderRadius: 6, fontWeight: 600 }}>
+                KPI
+              </Tag>
             </div>
             <Statistic
-              title={<span style={{ color: '#6F767E', fontWeight: 500 }}>Total Revenue</span>}
-              value={summary?.totalRevenue}
-              precision={2}
-              prefix="₹"
-              valueStyle={{ color: '#1A1D1F', fontWeight: 'bold', fontSize: 28 }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card style={cardStyle} bordered={false}>
-            <div style={{ ...iconBoxStyle, background: 'rgba(255, 117, 76, 0.1)', color: '#FF754C' }}>
-              <ShoppingOutlined />
-            </div>
-            <Statistic
-              title={<span style={{ color: '#6F767E', fontWeight: 500 }}>Total Orders</span>}
-              value={summary?.totalOrders}
-              valueStyle={{ color: '#1A1D1F', fontWeight: 'bold', fontSize: 28 }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card style={cardStyle} bordered={false}>
-            <div style={{ ...iconBoxStyle, background: 'rgba(51, 214, 159, 0.1)', color: '#33D69F' }}>
-              <CreditCardOutlined />
-            </div>
-            <Statistic
-              title={<span style={{ color: '#6F767E', fontWeight: 500 }}>Pending Payments</span>}
-              value={summary?.pendingPayments}
-              valueStyle={{ color: '#1A1D1F', fontWeight: 'bold', fontSize: 28 }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card style={cardStyle} bordered={false}>
-            <div style={{ ...iconBoxStyle, background: 'rgba(255, 77, 79, 0.1)', color: '#FF4D4F' }}>
-              <WarningOutlined />
-            </div>
-            <Statistic
-              title={<span style={{ color: '#6F767E', fontWeight: 500 }}>Sync Failures</span>}
-              value={summary?.syncFailures}
-              valueStyle={{ color: '#1A1D1F', fontWeight: 'bold', fontSize: 28 }}
+              title={statTitle('Total revenue')}
+              value={summary?.totalRevenue ?? 0}
+              formatter={(val) => formatInr(val)}
+              valueStyle={{ color: '#0F172A', fontWeight: 800, fontSize: 26 }}
             />
           </Card>
         </Col>
 
-        {/* Charts - Expanded to Full Width since Quick Actions removed */}
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="premium-card" styles={{ body: { padding: 22 } }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div
+                style={{
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  color: '#059669',
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                }}
+              >
+                <ShoppingOutlined />
+              </div>
+            </div>
+            <Statistic
+              title={statTitle('Total orders')}
+              value={summary?.totalOrders ?? 0}
+              valueStyle={{ color: '#0F172A', fontWeight: 800, fontSize: 26 }}
+            />
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="premium-card" styles={{ body: { padding: 22 } }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div
+                style={{
+                  background: 'rgba(14, 165, 233, 0.1)',
+                  color: '#0284C7',
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                }}
+              >
+                <WalletOutlined />
+              </div>
+            </div>
+            <Statistic
+              title={statTitle('Dine-in')}
+              value={summary?.dineInOrders ?? 0}
+              valueStyle={{ color: '#0F172A', fontWeight: 800, fontSize: 26 }}
+            />
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="premium-card" styles={{ body: { padding: 22 } }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div
+                style={{
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  color: '#D97706',
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                }}
+              >
+                <ShoppingOutlined />
+              </div>
+            </div>
+            <Statistic
+              title={statTitle('Takeaway')}
+              value={summary?.takeAwayOrders ?? 0}
+              valueStyle={{ color: '#0F172A', fontWeight: 800, fontSize: 26 }}
+            />
+          </Card>
+        </Col>
+
+        <Col xs={24} md={8}>
+          <Card className="premium-card" styles={{ body: { padding: 22 } }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <QrcodeOutlined style={{ fontSize: 22, color: '#6366F1' }} />
+              <Text strong style={{ color: '#0F172A' }}>
+                UPI (QR)
+              </Text>
+            </div>
+            <Statistic
+              title={statTitle('Completed')}
+              value={summary?.upiRupees ?? 0}
+              formatter={(val) => formatInr(val)}
+              valueStyle={{ color: '#0F172A', fontWeight: 800, fontSize: 22 }}
+            />
+          </Card>
+        </Col>
+
+        <Col xs={24} md={8}>
+          <Card className="premium-card" styles={{ body: { padding: 22 } }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <CreditCardOutlined style={{ fontSize: 22, color: '#6366F1' }} />
+              <Text strong style={{ color: '#0F172A' }}>
+                Card
+              </Text>
+            </div>
+            <Statistic
+              title={statTitle('Completed')}
+              value={summary?.cardRupees ?? 0}
+              formatter={(val) => formatInr(val)}
+              valueStyle={{ color: '#0F172A', fontWeight: 800, fontSize: 22 }}
+            />
+          </Card>
+        </Col>
+
+        <Col xs={24} md={8}>
+          <Card className="premium-card" styles={{ body: { padding: 22 } }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <BankOutlined style={{ fontSize: 22, color: '#6366F1' }} />
+              <Text strong style={{ color: '#0F172A' }}>
+                Cash + manual
+              </Text>
+            </div>
+            <Statistic
+              title={statTitle('Completed')}
+              value={summary?.cashRupees ?? 0}
+              formatter={(val) => formatInr(val)}
+              valueStyle={{ color: '#0F172A', fontWeight: 800, fontSize: 22 }}
+            />
+            <Text type="secondary" style={{ fontSize: 11, marginTop: 8, display: 'block' }}>
+              Manual amounts are grouped with cash in KPIs.
+            </Text>
+          </Card>
+        </Col>
+
         <Col span={24}>
-          <Card title={<span style={{ color: '#1A1D1F', fontWeight: 600 }}>Order Activity</span>} bordered={false} style={cardStyle}>
-            <div style={{ height: 350, marginTop: 16 }}>
+          <Card
+            title={<span style={{ color: '#0F172A', fontWeight: 700, fontSize: 17 }}>Activity (sample)</span>}
+            className="premium-card"
+            styles={{ body: { padding: '8px 20px 24px' } }}
+          >
+            <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
+              Illustrative hourly curve — wire to a time-series endpoint when available.
+            </Text>
+            <div style={{ height: 360, marginTop: 8 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>
-                    <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6C5DD3" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#6C5DD3" stopOpacity={0} />
+                    <linearGradient id="colorOrdersLight" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#EFEFEF" vertical={false} />
-                  <XAxis dataKey="name" stroke="#9A9FA5" axisLine={false} tickLine={false} dy={10} />
-                  <YAxis stroke="#9A9FA5" axisLine={false} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.12)', color: '#1A1D1F' }}
-                    itemStyle={{ color: '#1A1D1F' }}
-                    cursor={{ stroke: '#6C5DD3', strokeWidth: 1 }}
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    stroke="#94A3B8"
+                    axisLine={false}
+                    tickLine={false}
+                    dy={8}
+                    style={{ fontSize: 12 }}
                   />
-                  <Area type="monotone" dataKey="orders" stroke="#6C5DD3" strokeWidth={3} fillOpacity={1} fill="url(#colorOrders)" />
+                  <YAxis stroke="#94A3B8" axisLine={false} tickLine={false} style={{ fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: 10,
+                      boxShadow: '0 10px 40px -10px rgb(15 23 42 / 0.15)',
+                      color: '#0F172A',
+                    }}
+                    itemStyle={{ color: '#6366F1' }}
+                    cursor={{ stroke: '#6366F1', strokeWidth: 1 }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="#6366F1"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorOrdersLight)"
+                    animationDuration={1500}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -158,6 +321,7 @@ const DashboardPage = () => {
         </Col>
       </Row>
     </div>
+    </Spin>
   );
 };
 

@@ -1,9 +1,51 @@
-import React, { useEffect, useState } from 'react';
-import { Drawer, Descriptions, Table, Tag, Collapse, Button, message, Spin } from 'antd';
-import { CopyOutlined, ReloadOutlined } from '@ant-design/icons';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+  Drawer,
+  Descriptions,
+  Table,
+  Tag,
+  Collapse,
+  Button,
+  message,
+  Spin,
+  Typography,
+  Space,
+  Divider,
+  Tooltip,
+  theme,
+} from 'antd';
+import {
+  CopyOutlined,
+  ReloadOutlined,
+  ShoppingOutlined,
+  InfoCircleOutlined,
+  CodeOutlined,
+  CheckCircleFilled,
+} from '@ant-design/icons';
 import api from '../api';
+import {
+  formatInr,
+  formatIst,
+  getKotCode,
+  getOrderType,
+  getPaymentType,
+  lineTitle,
+  lineQty,
+  lineUnitPrice,
+  lineLineTotal,
+  pickFirst,
+} from '../utils/orderFields';
+
+const { Title, Text } = Typography;
+const { useToken } = theme;
+
+function pickSku(row) {
+  const s = pickFirst(row, ['sku_code', 'skuCode', 'sku', 'item_sku', 'itemSku']);
+  return s != null && String(s).trim() !== '' ? String(s) : null;
+}
 
 const OrderDetailsDrawer = ({ open, onClose, initialOrder }) => {
+  const { token } = useToken();
   const [loading, setLoading] = useState(false);
   const [details, setDetails] = useState(null);
 
@@ -21,156 +63,364 @@ const OrderDetailsDrawer = ({ open, onClose, initialOrder }) => {
       const response = await api.get(`/orders/${id}`);
       setDetails(response.data);
     } catch (error) {
-      console.error("Failed to fetch order details", error);
-      message.error("Failed to load details");
-      setDetails(initialOrder); // Fallback to list view data
+      console.error('Failed to fetch order details', error);
+      message.error('Failed to load details');
+      setDetails(initialOrder);
     } finally {
       setLoading(false);
     }
   };
 
   const handleRetrySync = () => {
-    message.loading("Retrying ERP Sync...", 1)
-      .then(() => message.success("Sync request sent successfully"));
+    message.loading('Retrying ERP Sync…', 1).then(() => message.success('Sync request sent'));
   };
 
-  const items = details?.items || [];
-  // Handle if items is a string (legacy/mock) or array (real)
-  const normalizedItems = typeof items === 'string' ? JSON.parse(items) : items;
-
-  const itemColumns = [
-    {
-      title: 'Item Name',
-      dataIndex: 'item_name',
-      key: 'name',
-    },
-    {
-      title: 'Qty',
-      dataIndex: 'quantity',
-      key: 'qty',
-    },
-    {
-      title: 'Price',
-      dataIndex: 'unit_price',
-      key: 'price',
-      render: (val) => `₹${Number(val).toFixed(2)}`,
-    },
-    {
-      title: 'Total',
-      key: 'total',
-      render: (_, record) => `₹${(record.quantity * record.unit_price).toFixed(2)}`,
+  const normalizedItems = useMemo(() => {
+    const raw = details?.items;
+    if (raw == null) return [];
+    if (typeof raw === 'string') {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return [];
+      }
     }
-  ];
+    return Array.isArray(raw) ? raw : [];
+  }, [details]);
+
+  const linesComputed = useMemo(() => {
+    return normalizedItems.map((row, index) => {
+      const qty = lineQty(row);
+      const unit = lineUnitPrice(row);
+      const total = lineLineTotal(row);
+      return { ...row, _idx: index, _qty: qty, _unit: unit, _lineTotal: total };
+    });
+  }, [normalizedItems]);
+
+  const subtotal = useMemo(
+    () => linesComputed.reduce((acc, r) => acc + (Number(r._lineTotal) || 0), 0),
+    [linesComputed]
+  );
+
+  const itemColumns = useMemo(
+    () => [
+      {
+        title: 'Item',
+        key: 'name',
+        render: (_, row) => (
+          <div>
+            <Text strong style={{ color: token.colorText, display: 'block' }}>
+              {lineTitle(row)}
+            </Text>
+            {pickSku(row) ? (
+              <Text type="secondary" style={{ fontSize: 11, fontFamily: 'monospace' }}>
+                SKU {pickSku(row)}
+              </Text>
+            ) : null}
+          </div>
+        ),
+      },
+      {
+        title: 'Qty',
+        key: 'qty',
+        width: 72,
+        align: 'center',
+        render: (_, row) => (
+          <Text style={{ color: token.colorTextSecondary, fontWeight: 600 }}>{row._qty}</Text>
+        ),
+      },
+      {
+        title: 'Unit price',
+        key: 'unit',
+        width: 110,
+        align: 'right',
+        render: (_, row) => <Text style={{ color: token.colorTextSecondary }}>{formatInr(row._unit)}</Text>,
+      },
+      {
+        title: 'Line total',
+        key: 'line',
+        width: 120,
+        align: 'right',
+        render: (_, row) => (
+          <Text style={{ color: token.colorPrimary, fontWeight: 700 }}>{formatInr(row._lineTotal)}</Text>
+        ),
+      },
+    ],
+    [token]
+  );
+
+  const headerId = details?.orderRefId || '';
 
   return (
     <Drawer
-      title={`Order Details: ${details?.orderRefId || ''}`}
+      title={
+        <Space size={12} wrap>
+          <ShoppingOutlined style={{ color: token.colorPrimary }} />
+          <span style={{ color: token.colorText, fontWeight: 800 }}>Order details</span>
+          {headerId ? (
+            <Tag
+              style={{
+                background: token.colorPrimaryBg,
+                color: token.colorPrimary,
+                border: `1px solid ${token.colorPrimaryBorder}`,
+                borderRadius: 4,
+                fontFamily: 'ui-monospace, monospace',
+              }}
+            >
+              {headerId}
+            </Tag>
+          ) : null}
+        </Space>
+      }
       placement="right"
-      width={640}
+      width={720}
       onClose={onClose}
       open={open}
+      styles={{
+        header: {
+          borderBottom: `1px solid ${token.colorSplit}`,
+          padding: '20px 24px',
+        },
+        body: { background: token.colorBgLayout, padding: '24px' },
+      }}
       extra={
         <Button
           type="primary"
           icon={<ReloadOutlined />}
           onClick={handleRetrySync}
           disabled={details?.erpStatus === 'POSTED'}
+          style={{ borderRadius: 8, fontWeight: 600 }}
         >
-          Retry ERP Sync
+          Retry sync
         </Button>
       }
     >
-      {loading ? <Spin /> : details && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <Descriptions bordered column={1} size="small" labelStyle={{ width: '150px' }}>
-            <Descriptions.Item label="Order Ref ID">
-              {details.orderRefId} <CopyOutlined style={{ cursor: 'pointer', marginLeft: 8 }} onClick={() => { navigator.clipboard.writeText(details.orderRefId); message.success('Copied'); }} />
-            </Descriptions.Item>
-            <Descriptions.Item label="Location">{details.location}</Descriptions.Item>
-            <Descriptions.Item label="Created At">{new Date(details.createdAt).toLocaleString()}</Descriptions.Item>
-            <Descriptions.Item label="Total Amount">₹{Number(details.amount).toFixed(2)}</Descriptions.Item>
-            <Descriptions.Item label="Payment Status">
-              <Tag color={details.paymentStatus === 'COMPLETED' ? 'success' : details.paymentStatus === 'PENDING' ? 'warning' : 'error'}>
-                {details.paymentStatus}
-              </Tag>
-            </Descriptions.Item>
-            <Descriptions.Item label="ERP Status">
-              <Tag color={details.erpStatus === 'POSTED' ? 'success' : 'red'}>
-                {details.erpStatus}
-              </Tag>
-            </Descriptions.Item>
-          </Descriptions>
-
-          <div>
-            <h3>Items</h3>
-            <Table
-              dataSource={normalizedItems}
-              columns={itemColumns}
-              pagination={false}
-              rowKey={(record, index) => index}
-              size="small"
-              bordered
-            />
-          </div>
-
-          <Collapse ghost>
-            <Collapse.Panel header="Payment Metadata (Debug)" key="1">
-              <div style={{ background: '#1e1e1e', padding: '12px', borderRadius: '6px', overflowX: 'auto' }}>
-                {(() => {
-                  try {
-                    const debugData = details.paymentMeta || details.gatewayResponse || details.gateway_response_string;
-                    if (!debugData) return <span style={{ color: '#fff' }}>No Metadata</span>;
-
-                    const parsed = typeof debugData === 'string' ? JSON.parse(debugData) : debugData;
-
-                    const highlight = (json) => {
-                      if (typeof json !== 'string') {
-                        json = JSON.stringify(json, null, 2);
-                      }
-                      const colors = {
-                        key: '#9cdcfe',
-                        string: '#ce9178',
-                        number: '#b5cea8',
-                        boolean: '#569cd6',
-                        null: '#569cd6',
-                        punctuation: '#d4d4d4'
-                      };
-
-                      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
-                        let cls = 'number';
-                        if (/^"/.test(match)) {
-                          if (/:$/.test(match)) {
-                            cls = 'key';
-                            // remove colon for styling, add it back outside
-                            return `<span style="color:${colors.key}">${match.slice(0, -1)}</span><span style="color:${colors.punctuation}">:</span>`;
-                          } else {
-                            cls = 'string';
-                          }
-                        } else if (/true|false/.test(match)) {
-                          cls = 'boolean';
-                        } else if (/null/.test(match)) {
-                          cls = 'null';
-                        }
-                        return `<span style="color:${colors[cls]}">${match}</span>`;
-                      });
-                    };
-
-                    const html = highlight(parsed);
-
-                    return (
-                      <pre
-                        style={{ margin: 0, fontSize: '11px', fontFamily: 'Menlo, Monaco, "Courier New", monospace', color: '#d4d4d4' }}
-                        dangerouslySetInnerHTML={{ __html: html }}
-                      />
-                    );
-                  } catch (e) {
-                    return <pre style={{ color: '#ce9178' }}>{String(details.paymentMeta || details.gatewayResponse || 'Parse Error')}</pre>;
-                  }
-                })()}
-              </div>
-            </Collapse.Panel>
-          </Collapse>
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+          <Spin size="large" />
         </div>
+      ) : (
+        details && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div
+              style={{
+                background: `linear-gradient(145deg, ${token.colorPrimaryBg} 0%, ${token.colorBgContainer} 55%)`,
+                borderRadius: 16,
+                border: `1px solid ${token.colorBorderSecondary}`,
+                padding: '20px 22px',
+              }}
+            >
+              <Space align="center" style={{ marginBottom: 12 }} wrap>
+                <InfoCircleOutlined style={{ color: token.colorPrimary }} />
+                <Text strong style={{ color: token.colorText, fontSize: 15 }}>
+                  Summary
+                </Text>
+                <Tag
+                  icon={<CheckCircleFilled />}
+                  color="success"
+                  style={{ marginLeft: 8, fontWeight: 700 }}
+                >
+                  {details.paymentStatus || '—'}
+                </Tag>
+              </Space>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                  gap: 16,
+                }}
+              >
+                <div>
+                  <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    KOT code
+                  </Text>
+                  <div style={{ color: token.colorText, fontWeight: 700, marginTop: 4 }}>{getKotCode(details)}</div>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    Order type
+                  </Text>
+                  <div style={{ marginTop: 4, color: token.colorText }}>{getOrderType(details)}</div>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    Payment type
+                  </Text>
+                  <div style={{ color: token.colorText, fontWeight: 600, marginTop: 4 }}>{getPaymentType(details)}</div>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    Location
+                  </Text>
+                  <div style={{ color: token.colorText, marginTop: 4 }}>{details.location || '—'}</div>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    Date (IST)
+                  </Text>
+                  <div style={{ color: token.colorText, marginTop: 4 }}>{formatIst(details.createdAt)}</div>
+                </div>
+              </div>
+              <Divider style={{ margin: '20px 0 16px' }} />
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  flexWrap: 'wrap',
+                  gap: 12,
+                }}
+              >
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  Billed total
+                </Text>
+                <Title level={3} style={{ margin: 0, color: token.colorText, fontWeight: 800 }}>
+                  {formatInr(details.amount)}
+                </Title>
+              </div>
+              {Math.abs(subtotal - Number(details.amount || 0)) > 0.02 && linesComputed.length > 0 ? (
+                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 8 }}>
+                  Line items sum {formatInr(subtotal)} — may differ from billed amount if discounts or taxes apply.
+                </Text>
+              ) : null}
+            </div>
+
+            <div>
+              <Space align="center" style={{ marginBottom: 12 }}>
+                <ShoppingOutlined style={{ color: token.colorPrimary }} />
+                <Text strong style={{ color: token.colorText, fontSize: 16 }}>
+                  Line items and pricing
+                </Text>
+              </Space>
+              <div
+                style={{
+                  background: token.colorBgContainer,
+                  borderRadius: 16,
+                  border: `1px solid ${token.colorBorderSecondary}`,
+                  overflow: 'hidden',
+                }}
+              >
+                <Table
+                  dataSource={linesComputed}
+                  columns={itemColumns}
+                  pagination={false}
+                  rowKey={(record) => record._idx}
+                  size="middle"
+                  locale={{ emptyText: 'No line items' }}
+                />
+                {linesComputed.length > 0 ? (
+                  <div
+                    style={{
+                      padding: '14px 16px',
+                      borderTop: `1px solid ${token.colorBorderSecondary}`,
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      gap: 24,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text type="secondary">Subtotal (lines)</Text>
+                    <Text strong style={{ color: token.colorText, fontSize: 16 }}>
+                      {formatInr(subtotal)}
+                    </Text>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div
+              style={{
+                background: token.colorBgContainer,
+                borderRadius: 16,
+                border: `1px solid ${token.colorBorderSecondary}`,
+                overflow: 'hidden',
+              }}
+            >
+              <Descriptions
+                column={1}
+                size="middle"
+                bordered={false}
+                labelStyle={{
+                  color: token.colorTextSecondary,
+                  padding: '12px 20px',
+                  width: 180,
+                  background: token.colorFillAlter,
+                }}
+                contentStyle={{ color: token.colorText, padding: '12px 20px' }}
+              >
+                <Descriptions.Item label="Reference ID">
+                  <Space>
+                    <span style={{ fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{details.orderRefId}</span>
+                    <Tooltip title="Copy">
+                      <CopyOutlined
+                        style={{ cursor: 'pointer', color: token.colorPrimary }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(details.orderRefId);
+                          message.success('Copied');
+                        }}
+                      />
+                    </Tooltip>
+                  </Space>
+                </Descriptions.Item>
+                <Descriptions.Item label="ERP / KDS">{details.erpStatus || '—'}</Descriptions.Item>
+              </Descriptions>
+            </div>
+
+            <Collapse
+              ghost
+              expandIcon={({ isActive }) => (
+                <CodeOutlined rotate={isActive ? 90 : 0} style={{ color: token.colorPrimary }} />
+              )}
+            >
+              <Collapse.Panel
+                header={<span style={{ color: token.colorTextSecondary, fontWeight: 600 }}>Payment metadata</span>}
+                key="1"
+              >
+                <div
+                  style={{
+                    background: token.colorFillAlter,
+                    padding: '20px',
+                    borderRadius: 12,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    overflowX: 'auto',
+                  }}
+                >
+                  {(() => {
+                    try {
+                      const debugData =
+                        details.paymentMeta || details.gatewayResponse || details.gateway_response_string;
+                      if (!debugData) {
+                        return <span style={{ color: token.colorTextSecondary }}>No metadata</span>;
+                      }
+                      const parsed = typeof debugData === 'string' ? JSON.parse(debugData) : debugData;
+                      return (
+                        <pre
+                          style={{
+                            margin: 0,
+                            fontSize: 11,
+                            fontFamily: '"Fira Code", ui-monospace, monospace',
+                            lineHeight: 1.6,
+                            color: token.colorTextSecondary,
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                          }}
+                        >
+                          {JSON.stringify(parsed, null, 2)}
+                        </pre>
+                      );
+                    } catch {
+                      return (
+                        <pre style={{ color: token.colorError, margin: 0 }}>
+                          {String(details.paymentMeta || details.gatewayResponse || 'Parse error')}
+                        </pre>
+                      );
+                    }
+                  })()}
+                </div>
+              </Collapse.Panel>
+            </Collapse>
+          </div>
+        )
       )}
     </Drawer>
   );

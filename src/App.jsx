@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Layout, Menu, ConfigProvider, Button } from 'antd';
-import { DashboardOutlined, UserOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { Layout, Menu, ConfigProvider, Button, Avatar, Space } from 'antd';
+import {
+  DashboardOutlined,
+  UserOutlined,
+  ThunderboltFilled,
+  MenuUnfoldOutlined,
+  MenuFoldOutlined,
+  TransactionOutlined,
+} from '@ant-design/icons';
 import TransactionsPage from './pages/TransactionsPage';
 import DashboardPage from './pages/DashboardPage';
-import ItemAvailabilityPage from './pages/ItemAvailabilityPage';
+import PeriodControl from './components/PeriodControl';
+import { DashboardPeriodProvider } from './context/DashboardPeriodContext';
 import { modernTheme } from './theme';
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 
 const AppLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -16,56 +24,144 @@ const AppLayout = () => {
   const menuItems = [
     {
       key: '/',
-      icon: <DashboardOutlined />,
+      icon: <DashboardOutlined style={{ fontSize: '18px' }} />,
       label: <Link to="/">Dashboard</Link>,
     },
     {
-      key: '/availability',
-      icon: <UnorderedListOutlined />,
-      label: <Link to="/availability">Item Availability</Link>,
-    },
-    {
       key: '/transactions',
-      icon: <UnorderedListOutlined />,
+      icon: <TransactionOutlined style={{ fontSize: '18px' }} />,
       label: <Link to="/transactions">Transactions</Link>,
     },
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#F4F5F7' }}>
-      <Sider
+    <Layout style={{ minHeight: '100vh', background: '#F1F5F9' }}>
+      <Layout.Sider
         collapsible
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
         theme="light"
+        width={260}
         style={{
-          borderRight: '1px solid #EFEFEF',
-          boxShadow: '4px 0 24px rgba(0,0,0,0.02)'
+          background: '#FFFFFF',
+          borderRight: '1px solid #E2E8F0',
+          position: 'fixed',
+          height: '100vh',
+          left: 0,
+          zIndex: 100,
         }}
         trigger={null}
       >
-        <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A1D1F', fontWeight: 800, fontSize: '20px', letterSpacing: '1px' }}>
-          {collapsed ? 'K' : 'KTR ADMIN'}
+        <div
+          style={{
+            height: 72,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 24px',
+            color: '#0F172A',
+            fontWeight: 800,
+            fontSize: '18px',
+            letterSpacing: '0.5px',
+            borderBottom: '1px solid #F1F5F9',
+          }}
+        >
+          <ThunderboltFilled style={{ color: '#6366F1', marginRight: 12, fontSize: '22px' }} />
+          {!collapsed && (
+            <span>
+              KTR <span style={{ color: '#6366F1' }}>Admin</span>
+            </span>
+          )}
         </div>
-        <Menu
-          theme="light"
-          defaultSelectedKeys={['/']}
-          selectedKeys={[location.pathname]}
-          mode="inline"
-          items={menuItems}
-          style={{ borderRight: 0, fontSize: '15px', fontWeight: 500 }}
-        />
-      </Sider>
-      <Layout style={{ background: '#F4F5F7' }}>
-        <Header style={{ padding: '0 32px', background: 'transparent', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', borderBottom: 'none', height: 80 }} >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Button type="text" icon={<UserOutlined />} style={{ color: '#1A1D1F', fontSize: '16px', fontWeight: 500 }}>Admin</Button>
+
+        <div style={{ padding: '0 12px' }}>
+          <Menu
+            theme="light"
+            selectedKeys={[location.pathname]}
+            mode="inline"
+            items={menuItems}
+            style={{
+              background: 'transparent',
+              borderRight: 0,
+              marginTop: 12,
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 24,
+            width: '100%',
+            padding: '0 16px',
+            opacity: collapsed ? 0 : 1,
+            transition: 'opacity 0.3s',
+          }}
+        >
+          <div
+            style={{
+              background: 'rgba(99, 102, 241, 0.06)',
+              padding: 14,
+              borderRadius: 12,
+              border: '1px solid rgba(99, 102, 241, 0.15)',
+            }}
+          >
+            <p style={{ margin: 0, color: '#0F172A', fontSize: '12px', fontWeight: 600 }}>Pro Support</p>
+            <p style={{ margin: '4px 0 0 0', color: '#64748B', fontSize: '11px' }}>Priority access</p>
           </div>
+        </div>
+      </Layout.Sider>
+
+      <Layout
+        style={{
+          marginLeft: collapsed ? 80 : 260,
+          transition: 'margin-left 0.2s',
+          background: 'transparent',
+        }}
+      >
+        <Header
+          className="glass-panel"
+          style={{
+            margin: '12px 24px',
+            borderRadius: 14,
+            padding: '0 20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            minHeight: 64,
+            height: 'auto',
+            paddingTop: 12,
+            paddingBottom: 12,
+            position: 'sticky',
+            top: 12,
+            zIndex: 99,
+            flexWrap: 'wrap',
+            gap: 12,
+          }}
+        >
+          <Space size={16} wrap align="center">
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{ color: '#475569', fontSize: '18px' }}
+            />
+            <PeriodControl />
+          </Space>
+
+          <Avatar
+            size={40}
+            style={{
+              backgroundColor: '#6366F1',
+              border: '2px solid #EEF2FF',
+              cursor: 'pointer',
+            }}
+            icon={<UserOutlined />}
+          />
         </Header>
-        <Content style={{ margin: '0 32px 32px 32px', overflowY: 'auto' }}>
+
+        <Content style={{ margin: '0 24px 32px 24px', minHeight: 280 }} className="animate-fade-in">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
-            <Route path="/availability" element={<ItemAvailabilityPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
           </Routes>
         </Content>
@@ -78,7 +174,9 @@ const App = () => {
   return (
     <ConfigProvider theme={modernTheme}>
       <Router>
-        <AppLayout />
+        <DashboardPeriodProvider>
+          <AppLayout />
+        </DashboardPeriodProvider>
       </Router>
     </ConfigProvider>
   );
