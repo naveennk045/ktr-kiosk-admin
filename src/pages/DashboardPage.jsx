@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Typography, Spin, Space, Tag } from 'antd';
+import { Card, Row, Col, Statistic, Typography, Spin, Space, Tag, message } from 'antd';
 import {
   CreditCardOutlined,
   ShoppingOutlined,
@@ -13,6 +13,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import api from '../api';
 import { useDashboardPeriod } from '../context/DashboardPeriodContext';
 import { formatInr } from '../utils/orderFields';
+import { formatApiError } from '../utils/formatApiError';
 
 const { Title, Text } = Typography;
 
@@ -41,7 +42,10 @@ const DashboardPage = () => {
         if (!cancelled) setSummary(response.data);
       } catch (err) {
         console.error('Failed to fetch analytics', err);
-        if (!cancelled) setSummary(null);
+        if (!cancelled) {
+          setSummary(null);
+          message.error(formatApiError(err));
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -266,7 +270,7 @@ const DashboardPage = () => {
           </Card>
         </Col>
 
-        <Col span={24}>
+        <Col span={24} style={{ minWidth: 0 }}>
           <Card
             title={<span style={{ color: '#0F172A', fontWeight: 700, fontSize: 17 }}>Activity (sample)</span>}
             className="premium-card"
@@ -275,7 +279,7 @@ const DashboardPage = () => {
             <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
               Illustrative hourly curve — wire to a time-series endpoint when available.
             </Text>
-            <div style={{ height: 360, marginTop: 8 }}>
+            <div style={{ height: 360, marginTop: 8, minWidth: 0 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>

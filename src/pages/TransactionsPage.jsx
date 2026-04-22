@@ -9,7 +9,13 @@ import {
 import api from '../api';
 import OrderDetailsDrawer from '../components/OrderDetailsDrawer';
 import { formatIst, formatInr, getKotCode, getOrderType, getPaymentType } from '../utils/orderFields';
+import { formatApiError } from '../utils/formatApiError';
 import { useDashboardPeriod } from '../context/DashboardPeriodContext';
+
+function toApiSortBy(field) {
+  if (field === 'amount' || field === 'total_amount') return 'total_amount';
+  return 'created_at';
+}
 
 const { Title, Text } = Typography;
 
@@ -31,7 +37,7 @@ const TransactionsPage = () => {
         const params = {
           page: page - 1,
           size: pageSize,
-          sortBy: sort,
+          sortBy: toApiSortBy(sort),
           sortDir: dir,
           status: 'COMPLETED',
           period,
@@ -39,7 +45,8 @@ const TransactionsPage = () => {
         if (search && String(search).trim()) {
           params.search = String(search).trim();
         }
-        const response = await api.get('/orders', { params });
+        // Use trailing slash: nginx otherwise 307-redirects to http://.../orders/ (HTTPS→HTTP breaks in browser)
+        const response = await api.get('/orders/', { params });
         setData(response.data.content || []);
         setPagination({
           current: page,
@@ -48,7 +55,7 @@ const TransactionsPage = () => {
         });
       } catch (error) {
         console.error('Fetch orders failed', error);
-        message.error('Failed to fetch orders');
+        message.error(formatApiError(error));
         setData([]);
       } finally {
         setLoading(false);

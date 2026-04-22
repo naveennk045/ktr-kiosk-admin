@@ -17,7 +17,9 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const storeId = localStorage.getItem('KIOSK_STORE_ID');
+  const fromStorage = localStorage.getItem('KIOSK_STORE_ID');
+  const fromEnv = String(import.meta.env.VITE_DEFAULT_STORE_ID ?? '').trim();
+  const storeId = (fromStorage && String(fromStorage).trim()) || fromEnv;
   if (storeId) {
     config.headers['X-Store-Id'] = storeId;
   }
