@@ -12,6 +12,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../api';
 import { useDashboardPeriod } from '../context/DashboardPeriodContext';
+import { useStoreView } from '../context/StoreViewContext';
 import { formatInr } from '../utils/orderFields';
 import { formatApiError } from '../utils/formatApiError';
 
@@ -19,6 +20,7 @@ const { Title, Text } = Typography;
 
 const DashboardPage = () => {
   const { period, periodLabel } = useDashboardPeriod();
+  const { isMultiStore, selectedStoreCodes } = useStoreView();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
 
@@ -38,7 +40,13 @@ const DashboardPage = () => {
     const fetchSummary = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/analytics/summary', { params: { period } });
+        const response = await api.get(isMultiStore ? '/admin/analytics/summary' : '/analytics/summary', {
+          params: {
+            period,
+            active_only: true,
+            store_codes: isMultiStore && selectedStoreCodes.length > 0 ? selectedStoreCodes.join(',') : undefined,
+          },
+        });
         if (!cancelled) setSummary(response.data);
       } catch (err) {
         console.error('Failed to fetch analytics', err);
@@ -54,7 +62,7 @@ const DashboardPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [period]);
+  }, [period, isMultiStore, selectedStoreCodes]);
 
   const statTitle = (label) => (
     <span style={{ color: '#64748B', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -97,7 +105,8 @@ const DashboardPage = () => {
             Analytics overview
           </Title>
           <Text type="secondary" style={{ fontSize: 15 }}>
-            Completed orders only — revenue and payment mix for the selected window.
+            Completed orders only — revenue and payment mix for the selected window
+            {isMultiStore ? ' across selected stores.' : '.'}
           </Text>
         </div>
       </div>

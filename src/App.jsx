@@ -1,25 +1,38 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Layout, Menu, ConfigProvider, Button, Avatar, Space } from 'antd';
+import { Layout, Menu, ConfigProvider, Button } from 'antd';
 import {
   DashboardOutlined,
-  UserOutlined,
   ThunderboltFilled,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   TransactionOutlined,
+  SettingOutlined,
+  FileTextOutlined,
+  ShoppingOutlined,
+  BankOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 import TransactionsPage from './pages/TransactionsPage';
 import DashboardPage from './pages/DashboardPage';
+import ConfigPage from './pages/ConfigPage';
+import LogsPage from './pages/LogsPage';
+import ItemAnalysisPage from './pages/ItemAnalysisPage';
+import AccountingPage from './pages/AccountingPage';
+import UserDocsPage from './pages/UserDocsPage';
 import PeriodControl from './components/PeriodControl';
+import StoreSwitcher from './components/StoreSwitcher';
 import { DashboardPeriodProvider } from './context/DashboardPeriodContext';
+import { StoreViewProvider } from './context/StoreViewContext';
 import { modernTheme } from './theme';
 
 const { Header, Content } = Layout;
 
 const AppLayout = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [siderPinned, setSiderPinned] = useState(false);
+  const [siderHover, setSiderHover] = useState(false);
   const location = useLocation();
+  const collapsed = !(siderPinned || siderHover);
 
   const menuItems = [
     {
@@ -32,6 +45,31 @@ const AppLayout = () => {
       icon: <TransactionOutlined style={{ fontSize: '18px' }} />,
       label: <Link to="/transactions">Transactions</Link>,
     },
+    {
+      key: '/items',
+      icon: <ShoppingOutlined style={{ fontSize: '18px' }} />,
+      label: <Link to="/items">Item Analysis</Link>,
+    },
+    {
+      key: '/accounting',
+      icon: <BankOutlined style={{ fontSize: '18px' }} />,
+      label: <Link to="/accounting">Accounting</Link>,
+    },
+    {
+      key: '/logs',
+      icon: <FileTextOutlined style={{ fontSize: '18px' }} />,
+      label: <Link to="/logs">Logs</Link>,
+    },
+    {
+      key: '/config',
+      icon: <SettingOutlined style={{ fontSize: '18px' }} />,
+      label: <Link to="/config">Config</Link>,
+    },
+    {
+      key: '/docs',
+      icon: <BookOutlined style={{ fontSize: '18px' }} />,
+      label: <Link to="/docs">Documentation</Link>,
+    },
   ];
 
   return (
@@ -39,7 +77,6 @@ const AppLayout = () => {
       <Layout.Sider
         collapsible
         collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
         theme="light"
         width={260}
         style={{
@@ -51,6 +88,8 @@ const AppLayout = () => {
           zIndex: 100,
         }}
         trigger={null}
+        onMouseEnter={() => setSiderHover(true)}
+        onMouseLeave={() => setSiderHover(false)}
       >
         <div
           style={{
@@ -68,7 +107,7 @@ const AppLayout = () => {
           <ThunderboltFilled style={{ color: '#6366F1', marginRight: 12, fontSize: '22px' }} />
           {!collapsed && (
             <span>
-              KTR <span style={{ color: '#6366F1' }}>Admin</span>
+              KTR-<span style={{ color: '#6366F1' }}>ONE</span>
             </span>
           )}
         </div>
@@ -138,31 +177,30 @@ const AppLayout = () => {
             gap: 12,
           }}
         >
-          <Space size={16} wrap align="center">
+          {/* ── Left: hamburger + store switcher ── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => setSiderPinned((prev) => !prev)}
               style={{ color: '#475569', fontSize: '18px' }}
             />
-            <PeriodControl />
-          </Space>
+            <StoreSwitcher />
+          </div>
 
-          <Avatar
-            size={40}
-            style={{
-              backgroundColor: '#6366F1',
-              border: '2px solid #EEF2FF',
-              cursor: 'pointer',
-            }}
-            icon={<UserOutlined />}
-          />
+          {/* ── Right: period control ── */}
+          <PeriodControl />
         </Header>
 
         <Content style={{ margin: '0 24px 32px 24px', minHeight: 280 }} className="animate-fade-in">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
+            <Route path="/items" element={<ItemAnalysisPage />} />
+            <Route path="/accounting" element={<AccountingPage />} />
+            <Route path="/logs" element={<LogsPage />} />
+            <Route path="/config" element={<ConfigPage />} />
+            <Route path="/docs" element={<UserDocsPage />} />
           </Routes>
         </Content>
       </Layout>
@@ -175,7 +213,9 @@ const App = () => {
     <ConfigProvider theme={modernTheme}>
       <Router>
         <DashboardPeriodProvider>
-          <AppLayout />
+          <StoreViewProvider>
+            <AppLayout />
+          </StoreViewProvider>
         </DashboardPeriodProvider>
       </Router>
     </ConfigProvider>

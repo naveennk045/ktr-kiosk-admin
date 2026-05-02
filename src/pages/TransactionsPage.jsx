@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Tag, Input, Button, Card, message, Typography, Space, Tooltip, Spin } from 'antd';
+import { Table, Tag, Input, Button, Card, message, Typography, Space, Tooltip, Spin, Select } from 'antd';
 import {
   SearchOutlined,
   EyeOutlined,
@@ -11,6 +11,7 @@ import OrderDetailsDrawer from '../components/OrderDetailsDrawer';
 import { formatIst, formatInr, getKotCode, getOrderType, getPaymentType } from '../utils/orderFields';
 import { formatApiError } from '../utils/formatApiError';
 import { useDashboardPeriod } from '../context/DashboardPeriodContext';
+import { useStoreView } from '../context/StoreViewContext';
 
 function toApiSortBy(field) {
   if (field === 'amount' || field === 'total_amount') return 'total_amount';
@@ -18,9 +19,11 @@ function toApiSortBy(field) {
 }
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 const TransactionsPage = () => {
   const { period, periodLabel } = useDashboardPeriod();
+  const { isMultiStore, selectedStoreCodes } = useStoreView();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
@@ -29,6 +32,13 @@ const TransactionsPage = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sortField, setSortField] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [filters, setFilters] = useState({
+    payment_method: undefined,
+    payment_status: undefined,
+    order_type: undefined,
+    kds_status: undefined,
+    terminal_id: '',
+  });
 
   const fetchData = useCallback(
     async (page = 1, pageSize = 20, search = '', sort = 'created_at', dir = 'desc') => {
@@ -39,15 +49,37 @@ const TransactionsPage = () => {
           size: pageSize,
           sortBy: toApiSortBy(sort),
           sortDir: dir,
-          status: 'COMPLETED',
           period,
         };
+        if (!isMultiStore) {
+          params.status = filters.payment_status || 'COMPLETED';
+        } else {
+          params.active_only = true;
+          params.payment_status = filters.payment_status || 'COMPLETED';
+          if (selectedStoreCodes.length > 0) {
+            params.store_codes = selectedStoreCodes.join(',');
+          }
+        }
+        
+        if (filters.payment_method) params.payment_method = filters.payment_method;
+        if (filters.order_type) params.order_type = filters.order_type;
+        if (filters.kds_status) params.kds_status = filters.kds_status;
+        if (filters.terminal_id) params.terminal_id = filters.terminal_id;
+
         if (search && String(search).trim()) {
           params.search = String(search).trim();
         }
-        // Use trailing slash: nginx otherwise 307-redirects to http://.../orders/ (HTTPS→HTTP breaks in browser)
-        const response = await api.get('/orders/', { params });
-        setData(response.data.content || []);
+        const endpoint = isMultiStore ? '/admin/transactions' : '/orders/';
+        const response = await api.get(endpoint, { params });
+        const content = response.data.content || [];
+        setData(
+          content.map((row) => ({
+            ...row,
+            orderRefId: row.orderRefId || row.order_id || row.id || '—',
+            createdAt: row.createdAt || row.created_at,
+            amount: row.amount ?? row.total_amount ?? row.totalAmount ?? 0,
+          }))
+        );
         setPagination({
           current: page,
           pageSize,
@@ -61,13 +93,13 @@ const TransactionsPage = () => {
         setLoading(false);
       }
     },
-    [period]
+    [period, isMultiStore, selectedStoreCodes]
   );
 
   useEffect(() => {
     fetchData(1, pagination.pageSize, searchText, sortField, sortOrder);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: refetch when period/search changes; sort & page size handled via table onChange
-  }, [searchText, period, fetchData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText, period, fetchData, filters]);
 
   const handleTableChange = (newPagination, _filters, sorter) => {
     const sortChanged =
@@ -86,6 +118,16 @@ const TransactionsPage = () => {
   };
 
   const columns = [
+    {
+      title: 'Store',
+      key: 'store',
+      width: 180,
+      render: (_, record) => (
+        <Text style={{ color: '#334155', fontSize: '13px' }}>
+          {record.store_name || record.storeName || record.store_code || record.storeCode || '—'}
+        </Text>
+      ),
+    },
     {
       title: 'Order ID',
       dataIndex: 'orderRefId',
@@ -215,36 +257,87 @@ const TransactionsPage = () => {
             Transactions
           </Title>
           <Text type="secondary">
-            Paid orders only · same period as the header: <strong>{periodLabel}</strong> (IST). Search by order ID.
+            Paid orders only{isMultiStore ? ' across stores' : ''} · same period as the header:{' '}
+            <strong>{periodLabel}</strong> (IST). Search by order ID.
           </Text>
         </div>
 
-        <Space size={16} wrap>
-          <Input
-            placeholder="Search order ID…"
-            prefix={<SearchOutlined style={{ color: '#94A3B8' }} />}
-            allowClear
-            style={{
-              width: 320,
-              height: 44,
-              borderRadius: 10,
-            }}
-            onPressEnter={(e) => setSearchText(e.target.value)}
-            onChange={(e) => {
-              if (!e.target.value) setSearchText('');
-            }}
-          />
-          <Tooltip title="Refresh">
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() =>
-                fetchData(pagination.current, pagination.pageSize, searchText, sortField, sortOrder)
-              }
-              style={{ height: 44, width: 44, borderRadius: 10 }}
+          <Space size={16} wrap>
+            <Input
+              placeholder="Search order ID…"
+              prefix={<SearchOutlined style={{ color: '#94A3B8' }} />}
+              allowClear
+              style={{
+                width: 320,
+                height: 44,
+                borderRadius: 10,
+              }}
+              onPressEnter={(e) => setSearchText(e.target.value)}
+              onChange={(e) => {
+                if (!e.target.value) setSearchText('');
+              }}
             />
-          </Tooltip>
-        </Space>
-      </div>
+            <Tooltip title="Refresh">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() =>
+                  fetchData(pagination.current, pagination.pageSize, searchText, sortField, sortOrder)
+                }
+                style={{ height: 44, width: 44, borderRadius: 10 }}
+              />
+            </Tooltip>
+          </Space>
+        </div>
+
+        <div style={{ marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <Select
+            placeholder="Payment Method"
+            allowClear
+            style={{ width: 160 }}
+            onChange={(val) => setFilters((prev) => ({ ...prev, payment_method: val }))}
+          >
+            <Option value="QR">QR</Option>
+            <Option value="CARD">Card</Option>
+            <Option value="CASH">Cash</Option>
+            <Option value="MANUAL">Manual</Option>
+          </Select>
+          <Select
+            placeholder="Payment Status"
+            allowClear
+            style={{ width: 160 }}
+            onChange={(val) => setFilters((prev) => ({ ...prev, payment_status: val }))}
+          >
+            <Option value="PENDING">Pending</Option>
+            <Option value="COMPLETED">Completed</Option>
+            <Option value="FAILED">Failed</Option>
+          </Select>
+          <Select
+            placeholder="Order Type"
+            allowClear
+            style={{ width: 160 }}
+            onChange={(val) => setFilters((prev) => ({ ...prev, order_type: val }))}
+          >
+            <Option value="DINEIN">Dine-in</Option>
+            <Option value="TAKEAWAY">Takeaway</Option>
+          </Select>
+          <Select
+            placeholder="KDS Status"
+            allowClear
+            style={{ width: 160 }}
+            onChange={(val) => setFilters((prev) => ({ ...prev, kds_status: val }))}
+          >
+            <Option value="NOT_POSTED">Not Posted</Option>
+            <Option value="PENDING">Pending</Option>
+            <Option value="POSTED">Posted</Option>
+            <Option value="FAILED">Failed</Option>
+          </Select>
+          <Input
+            placeholder="Terminal ID"
+            allowClear
+            style={{ width: 160 }}
+            onChange={(e) => setFilters((prev) => ({ ...prev, terminal_id: e.target.value }))}
+          />
+        </div>
 
       <Spin spinning={loading} delay={120}>
         <Card className="premium-card" styles={{ body: { padding: 8 } }}>
