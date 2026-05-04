@@ -10,7 +10,7 @@ import { formatApiError } from '../utils/formatApiError';
 const { Title, Text } = Typography;
 
 const ItemAnalysisPage = () => {
-  const { period, periodLabel } = useDashboardPeriod();
+  const { period, periodLabel, fromDate, toDate } = useDashboardPeriod();
   const { isMultiStore, selectedStoreCodes } = useStoreView();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
@@ -26,6 +26,8 @@ const ItemAnalysisPage = () => {
         const response = await api.get('/analytics/items/summary', {
           params: {
             period,
+            from_date: period === 'custom_range' ? fromDate : undefined,
+            to_date: period === 'custom_range' ? toDate : undefined,
           },
         });
         if (!cancelled) {
@@ -49,7 +51,7 @@ const ItemAnalysisPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [period, isMultiStore, selectedStoreCodes]);
+  }, [period, fromDate, toDate, isMultiStore, selectedStoreCodes]);
 
   const columns = [
     {

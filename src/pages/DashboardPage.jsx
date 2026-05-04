@@ -19,7 +19,7 @@ import { formatApiError } from '../utils/formatApiError';
 const { Title, Text } = Typography;
 
 const DashboardPage = () => {
-  const { period, periodLabel } = useDashboardPeriod();
+  const { period, periodLabel, fromDate, toDate } = useDashboardPeriod();
   const { isMultiStore, selectedStoreCodes } = useStoreView();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
@@ -43,6 +43,8 @@ const DashboardPage = () => {
         const response = await api.get(isMultiStore ? '/admin/analytics/summary' : '/analytics/summary', {
           params: {
             period,
+            from_date: period === 'custom_range' ? fromDate : undefined,
+            to_date: period === 'custom_range' ? toDate : undefined,
             active_only: true,
             store_codes: isMultiStore && selectedStoreCodes.length > 0 ? selectedStoreCodes.join(',') : undefined,
           },
@@ -62,7 +64,7 @@ const DashboardPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [period, isMultiStore, selectedStoreCodes]);
+  }, [period, fromDate, toDate, isMultiStore, selectedStoreCodes]);
 
   const statTitle = (label) => (
     <span style={{ color: '#64748B', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>

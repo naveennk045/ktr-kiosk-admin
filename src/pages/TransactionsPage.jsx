@@ -14,7 +14,7 @@ import { useDashboardPeriod } from '../context/DashboardPeriodContext';
 import { useStoreView } from '../context/StoreViewContext';
 
 function toApiSortBy(field) {
-  if (field === 'amount' || field === 'total_amount') return 'total_amount';
+  if (field === 'amount' || field === 'total_amount') return 'amount';
   return 'created_at';
 }
 
@@ -22,7 +22,7 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 
 const TransactionsPage = () => {
-  const { period, periodLabel } = useDashboardPeriod();
+  const { period, periodLabel, fromDate, toDate } = useDashboardPeriod();
   const { isMultiStore, selectedStoreCodes } = useStoreView();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,9 +50,11 @@ const TransactionsPage = () => {
           sortBy: toApiSortBy(sort),
           sortDir: dir,
           period,
+          from_date: period === 'custom_range' ? fromDate : undefined,
+          to_date: period === 'custom_range' ? toDate : undefined,
         };
         if (!isMultiStore) {
-          params.status = filters.payment_status || 'COMPLETED';
+          params.payment_status = filters.payment_status || 'COMPLETED';
         } else {
           params.active_only = true;
           params.payment_status = filters.payment_status || 'COMPLETED';
@@ -93,13 +95,13 @@ const TransactionsPage = () => {
         setLoading(false);
       }
     },
-    [period, isMultiStore, selectedStoreCodes]
+    [period, fromDate, toDate, isMultiStore, selectedStoreCodes, filters]
   );
 
   useEffect(() => {
     fetchData(1, pagination.pageSize, searchText, sortField, sortOrder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText, period, fetchData, filters]);
+  }, [searchText, period, fromDate, toDate, fetchData, filters]);
 
   const handleTableChange = (newPagination, _filters, sorter) => {
     const sortChanged =

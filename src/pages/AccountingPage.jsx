@@ -10,7 +10,7 @@ import { formatApiError } from '../utils/formatApiError';
 const { Title, Text } = Typography;
 
 const AccountingPage = () => {
-  const { period, periodLabel } = useDashboardPeriod();
+  const { period, periodLabel, fromDate, toDate } = useDashboardPeriod();
   const { isMultiStore, selectedStoreCodes } = useStoreView();
   const [loading, setLoading] = useState(false);
   const [settlementData, setSettlementData] = useState([]);
@@ -23,6 +23,8 @@ const AccountingPage = () => {
         const response = await api.get('/admin/accounting/settlement', {
           params: {
             period,
+            from_date: period === 'custom_range' ? fromDate : undefined,
+            to_date: period === 'custom_range' ? toDate : undefined,
             active_only: true,
             store_codes: isMultiStore && selectedStoreCodes.length > 0 ? selectedStoreCodes.join(',') : undefined,
           },
@@ -44,7 +46,7 @@ const AccountingPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [period, isMultiStore, selectedStoreCodes]);
+  }, [period, fromDate, toDate, isMultiStore, selectedStoreCodes]);
 
   const pineLabsColumns = [
     { title: 'Terminal ID', dataIndex: 'terminalId', key: 'terminalId', render: (text) => <Text code>{text}</Text> },
