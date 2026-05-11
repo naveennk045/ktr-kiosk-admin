@@ -7,6 +7,7 @@ import {
   AppstoreOutlined,
   ClearOutlined,
   CheckSquareOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 import api from '../api';
 
@@ -175,6 +176,13 @@ const LiveMenuPage = () => {
           </div>
           
           <Space size="middle">
+            <Button 
+              icon={<ReloadOutlined />} 
+              onClick={fetchTemplateMenu}
+              style={{ borderRadius: 8, fontWeight: 600 }}
+            >
+              Reload
+            </Button>
             <Button 
               icon={<ClearOutlined />} 
               onClick={handleClearAll}
