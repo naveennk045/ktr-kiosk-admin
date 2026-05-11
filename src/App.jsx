@@ -12,6 +12,7 @@ import {
   ShoppingOutlined,
   BankOutlined,
   BookOutlined,
+  RocketOutlined,
 } from '@ant-design/icons';
 import TransactionsPage from './pages/TransactionsPage';
 import DashboardPage from './pages/DashboardPage';
@@ -20,6 +21,7 @@ import LogsPage from './pages/LogsPage';
 import ItemAnalysisPage from './pages/ItemAnalysisPage';
 import AccountingPage from './pages/AccountingPage';
 import UserDocsPage from './pages/UserDocsPage';
+import LiveMenuPage from './pages/LiveMenuPage';
 import PeriodControl from './components/PeriodControl';
 import StoreSwitcher from './components/StoreSwitcher';
 import { DashboardPeriodProvider } from './context/DashboardPeriodContext';
@@ -39,6 +41,11 @@ const AppLayout = () => {
       key: '/',
       icon: <DashboardOutlined style={{ fontSize: '18px' }} />,
       label: <Link to="/">Dashboard</Link>,
+    },
+    {
+      key: '/live-menu',
+      icon: <RocketOutlined style={{ fontSize: '18px' }} />,
+      label: <Link to="/live-menu">Live Menu</Link>,
     },
     {
       key: '/transactions',
@@ -195,6 +202,7 @@ const AppLayout = () => {
         <Content style={{ margin: '0 24px 32px 24px', minHeight: 280 }} className="animate-fade-in">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/live-menu" element={<LiveMenuPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/items" element={<ItemAnalysisPage />} />
             <Route path="/accounting" element={<AccountingPage />} />
