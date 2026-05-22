@@ -13,6 +13,7 @@ import {
   BankOutlined,
   BookOutlined,
   RocketOutlined,
+  GiftOutlined,
 } from '@ant-design/icons';
 import TransactionsPage from './pages/TransactionsPage';
 import DashboardPage from './pages/DashboardPage';
@@ -22,6 +23,7 @@ import ItemAnalysisPage from './pages/ItemAnalysisPage';
 import AccountingPage from './pages/AccountingPage';
 import UserDocsPage from './pages/UserDocsPage';
 import LiveMenuPage from './pages/LiveMenuPage';
+import DiscountsPage from './pages/DiscountsPage';
 import PeriodControl from './components/PeriodControl';
 import StoreSwitcher from './components/StoreSwitcher';
 import { DashboardPeriodProvider } from './context/DashboardPeriodContext';
@@ -71,6 +73,11 @@ const AppLayout = () => {
       key: '/config',
       icon: <SettingOutlined style={{ fontSize: '18px' }} />,
       label: <Link to="/config">Config</Link>,
+    },
+    {
+      key: '/discounts',
+      icon: <GiftOutlined style={{ fontSize: '18px' }} />,
+      label: <Link to="/discounts">Discounts</Link>,
     },
     {
       key: '/docs',
@@ -208,6 +215,7 @@ const AppLayout = () => {
             <Route path="/accounting" element={<AccountingPage />} />
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/config" element={<ConfigPage />} />
+            <Route path="/discounts" element={<DiscountsPage />} />
             <Route path="/docs" element={<UserDocsPage />} />
           </Routes>
         </Content>
