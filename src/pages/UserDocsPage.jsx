@@ -65,18 +65,19 @@ const UserDocsPage = () => {
           </Panel>
 
           <Panel 
-            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><ShoppingOutlined style={{ marginRight: 8, color: '#6366F1' }} /> Item Analysis</span>} 
+            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><ShoppingOutlined style={{ marginRight: 8, color: '#6366F1' }} /> Item & Category Analysis</span>} 
             key="3"
           >
             <Paragraph>
-              The <strong>Item Analysis</strong> section helps you identify your best and worst performing menu items.
+              The <strong>Product Performance</strong> page offers item-level and category-level sales analytics to help you identify bestseller trends, optimize pricing, and evaluate category popularity.
             </Paragraph>
             <List
               size="small"
               dataSource={[
-                'Identify Top Sellers by revenue or quantity sold.',
-                'Monitor low-performing items to optimize your menu.',
-                'Understand category performance breakdowns.'
+                'Item Analysis: Rank all individual menu items by quantity sold, revenue contribution, and unique order counts.',
+                'Category Analysis: Aggregate sales across PetPooja categories (e.g., Bengaluru Dose, Wada / Snacks) and track total volume, revenue, and order frequencies per category.',
+                'Interactive Visualizations: View category revenue distribution via interactive Pie Charts and compare units vs. revenue using dual-axis Bar Charts.',
+                'Drill Down: Expand any category row in the table to display a small, nested breakdown of specific items sold under that category.'
               ]}
               renderItem={(item) => <List.Item><Text>{item}</Text></List.Item>}
             />
