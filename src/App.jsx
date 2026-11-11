@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Layout, Menu, ConfigProvider, Button } from 'antd';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { Layout, Menu, ConfigProvider, Button, Spin, Tooltip } from 'antd';
 import {
   DashboardOutlined,
-  ThunderboltFilled,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   TransactionOutlined,
@@ -14,23 +13,114 @@ import {
   BookOutlined,
   RocketOutlined,
   GiftOutlined,
+  BulbOutlined,
+  FireOutlined,
+  LogoutOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import TransactionsPage from './pages/TransactionsPage';
 import DashboardPage from './pages/DashboardPage';
 import ConfigPage from './pages/ConfigPage';
 import LogsPage from './pages/LogsPage';
 import ItemAnalysisPage from './pages/ItemAnalysisPage';
+import InsightsPage from './pages/InsightsPage';
 import AccountingPage from './pages/AccountingPage';
 import UserDocsPage from './pages/UserDocsPage';
 import LiveMenuPage from './pages/LiveMenuPage';
 import DiscountsPage from './pages/DiscountsPage';
+import LiveOrdersPage from './pages/LiveOrdersPage';
+import LoginPage from './pages/LoginPage';
 import PeriodControl from './components/PeriodControl';
 import StoreSwitcher from './components/StoreSwitcher';
 import { DashboardPeriodProvider } from './context/DashboardPeriodContext';
 import { StoreViewProvider } from './context/StoreViewContext';
-import { modernTheme } from './theme';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ktrTheme } from './theme';
 
 const { Header, Content } = Layout;
+
+const item = (key, label, icon) => ({
+  key,
+  icon: React.cloneElement(icon, { style: { fontSize: 18 } }),
+  label: <Link to={key}>{label}</Link>,
+  title: label,
+});
+
+const MENU_ITEMS = [
+  {
+    type: 'group',
+    key: 'g-today',
+    label: 'Today',
+    children: [item('/', 'Dashboard', <DashboardOutlined />), item('/live', 'Live Orders', <FireOutlined />)],
+  },
+  {
+    type: 'group',
+    key: 'g-sales',
+    label: 'Sales',
+    children: [
+      item('/transactions', 'Transactions', <TransactionOutlined />),
+      item('/accounting', 'Accounting', <BankOutlined />),
+      item('/discounts', 'Discounts', <GiftOutlined />),
+    ],
+  },
+  {
+    type: 'group',
+    key: 'g-menu',
+    label: 'Menu & insights',
+    children: [
+      item('/live-menu', 'Live Menu', <RocketOutlined />),
+      item('/items', 'Item Analysis', <ShoppingOutlined />),
+      item('/insights', 'Insights', <BulbOutlined />),
+    ],
+  },
+  {
+    type: 'group',
+    key: 'g-system',
+    label: 'System',
+    children: [
+      item('/logs', 'Logs', <FileTextOutlined />),
+      item('/config', 'Config', <SettingOutlined />),
+      item('/docs', 'Documentation', <BookOutlined />),
+    ],
+  },
+];
+
+function formatSessionEnd(expiresAt) {
+  if (!expiresAt) return '';
+  const end = new Date(expiresAt);
+  const time = end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const sameDay = end.toDateString() === new Date().toDateString();
+  return sameDay ? time : `${end.toLocaleDateString([], { day: 'numeric', month: 'short' })}, ${time}`;
+}
+
+const UserBlock = () => {
+  const { user, expiresAt, logout } = useAuth();
+  const [leaving, setLeaving] = useState(false);
+  const name = user?.display_name || user?.username || 'Signed in';
+  return (
+    <div className="ktr-user">
+      <div className="ktr-user-text">
+        <span className="ktr-user-name" title={user?.username || undefined}>
+          <UserOutlined style={{ marginRight: 6 }} />
+          {name}
+        </span>
+        {expiresAt ? <span className="ktr-user-session">Session ends {formatSessionEnd(expiresAt)}</span> : null}
+      </div>
+      <Tooltip title="Sign out of KTR One">
+        <Button
+          icon={<LogoutOutlined />}
+          loading={leaving}
+          onClick={() => {
+            setLeaving(true);
+            logout();
+          }}
+        >
+          Sign out
+        </Button>
+      </Tooltip>
+    </div>
+  );
+};
 
 const AppLayout = () => {
   const [siderPinned, setSiderPinned] = useState(false);
@@ -38,185 +128,69 @@ const AppLayout = () => {
   const location = useLocation();
   const collapsed = !(siderPinned || siderHover);
 
-  const menuItems = [
-    {
-      key: '/',
-      icon: <DashboardOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/">Dashboard</Link>,
-    },
-    {
-      key: '/live-menu',
-      icon: <RocketOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/live-menu">Live Menu</Link>,
-    },
-    {
-      key: '/transactions',
-      icon: <TransactionOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/transactions">Transactions</Link>,
-    },
-    {
-      key: '/items',
-      icon: <ShoppingOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/items">Item Analysis</Link>,
-    },
-    {
-      key: '/accounting',
-      icon: <BankOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/accounting">Accounting</Link>,
-    },
-    {
-      key: '/logs',
-      icon: <FileTextOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/logs">Logs</Link>,
-    },
-    {
-      key: '/config',
-      icon: <SettingOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/config">Config</Link>,
-    },
-    {
-      key: '/discounts',
-      icon: <GiftOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/discounts">Discounts</Link>,
-    },
-    {
-      key: '/docs',
-      icon: <BookOutlined style={{ fontSize: '18px' }} />,
-      label: <Link to="/docs">Documentation</Link>,
-    },
-  ];
-
   return (
-    <Layout style={{ minHeight: '100vh', background: '#F1F5F9' }}>
+    <Layout style={{ minHeight: '100vh' }}>
       <Layout.Sider
+        className="ktr-sider"
         collapsible
         collapsed={collapsed}
         theme="light"
-        width={260}
-        style={{
-          background: '#FFFFFF',
-          borderRight: '1px solid #E2E8F0',
-          position: 'fixed',
-          height: '100vh',
-          left: 0,
-          zIndex: 100,
-        }}
+        width={248}
+        collapsedWidth={72}
+        style={{ position: 'fixed', height: '100vh', left: 0, top: 0, zIndex: 100 }}
         trigger={null}
         onMouseEnter={() => setSiderHover(true)}
         onMouseLeave={() => setSiderHover(false)}
       >
-        <div
-          style={{
-            height: 72,
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 24px',
-            color: '#0F172A',
-            fontWeight: 800,
-            fontSize: '18px',
-            letterSpacing: '0.5px',
-            borderBottom: '1px solid #F1F5F9',
-          }}
-        >
-          <ThunderboltFilled style={{ color: '#6366F1', marginRight: 12, fontSize: '22px' }} />
+        <Link to="/" className={`ktr-brand ${collapsed ? 'is-collapsed' : ''}`} aria-label="KTR One home">
+          <img src="/logo.png" alt="KTR" />
           {!collapsed && (
-            <span>
-              KTR-<span style={{ color: '#6366F1' }}>ONE</span>
+            <span className="ktr-brand-name">
+              <em>One</em>
             </span>
           )}
-        </div>
+        </Link>
 
-        <div style={{ padding: '0 12px' }}>
-          <Menu
-            theme="light"
-            selectedKeys={[location.pathname]}
-            mode="inline"
-            items={menuItems}
-            style={{
-              background: 'transparent',
-              borderRight: 0,
-              marginTop: 12,
-            }}
-          />
-        </div>
-
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 24,
-            width: '100%',
-            padding: '0 16px',
-            opacity: collapsed ? 0 : 1,
-            transition: 'opacity 0.3s',
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(99, 102, 241, 0.06)',
-              padding: 14,
-              borderRadius: 12,
-              border: '1px solid rgba(99, 102, 241, 0.15)',
-            }}
-          >
-            <p style={{ margin: 0, color: '#0F172A', fontSize: '12px', fontWeight: 600 }}>Pro Support</p>
-            <p style={{ margin: '4px 0 0 0', color: '#64748B', fontSize: '11px' }}>Priority access</p>
-          </div>
-        </div>
+        <nav className="ktr-menu-wrap" aria-label="Main">
+          <Menu theme="light" selectedKeys={[location.pathname]} mode="inline" items={MENU_ITEMS} />
+        </nav>
       </Layout.Sider>
 
-      <Layout
-        style={{
-          marginLeft: collapsed ? 80 : 260,
-          transition: 'margin-left 0.2s',
-          background: 'transparent',
-        }}
-      >
-        <Header
-          className="glass-panel"
-          style={{
-            margin: '12px 24px',
-            borderRadius: 14,
-            padding: '0 20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            minHeight: 64,
-            height: 'auto',
-            paddingTop: 12,
-            paddingBottom: 12,
-            position: 'sticky',
-            top: 12,
-            zIndex: 99,
-            flexWrap: 'wrap',
-            gap: 12,
-          }}
-        >
-          {/* ── Left: hamburger + store switcher ── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Button
-              type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setSiderPinned((prev) => !prev)}
-              style={{ color: '#475569', fontSize: '18px' }}
-            />
-            <StoreSwitcher />
+      <Layout style={{ marginLeft: collapsed ? 72 : 248, transition: 'margin-left 0.2s', background: 'transparent', minWidth: 0 }}>
+        <Header className="ktr-header">
+          <div className="ktr-header-row">
+            <div className="ktr-header-group">
+              <Button
+                type="text"
+                aria-label={siderPinned ? 'Collapse menu' : 'Keep menu open'}
+                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setSiderPinned((prev) => !prev)}
+                style={{ fontSize: 18 }}
+              />
+              <StoreSwitcher />
+            </div>
+            <div className="ktr-header-group">
+              <PeriodControl />
+              <UserBlock />
+            </div>
           </div>
-
-          {/* ── Right: period control ── */}
-          <PeriodControl />
+          <div className="ktr-plaid" aria-hidden="true" />
         </Header>
 
-        <Content style={{ margin: '0 24px 32px 24px', minHeight: 280 }} className="animate-fade-in">
+        <Content className="ktr-content animate-fade-in">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/live" element={<LiveOrdersPage />} />
             <Route path="/live-menu" element={<LiveMenuPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/items" element={<ItemAnalysisPage />} />
+            <Route path="/insights" element={<InsightsPage />} />
             <Route path="/accounting" element={<AccountingPage />} />
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/config" element={<ConfigPage />} />
             <Route path="/discounts" element={<DiscountsPage />} />
             <Route path="/docs" element={<UserDocsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Content>
       </Layout>
@@ -224,15 +198,38 @@ const AppLayout = () => {
   );
 };
 
+/** Everything except /login needs a session; remembers the page that was asked for. */
+const ProtectedApp = () => {
+  const { isAuthenticated, checking } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: location }} />;
+  if (checking) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+  return (
+    <DashboardPeriodProvider>
+      <StoreViewProvider>
+        <AppLayout />
+      </StoreViewProvider>
+    </DashboardPeriodProvider>
+  );
+};
+
 const App = () => {
   return (
-    <ConfigProvider theme={modernTheme}>
+    <ConfigProvider theme={ktrTheme}>
       <Router>
-        <DashboardPeriodProvider>
-          <StoreViewProvider>
-            <AppLayout />
-          </StoreViewProvider>
-        </DashboardPeriodProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/*" element={<ProtectedApp />} />
+          </Routes>
+        </AuthProvider>
       </Router>
     </ConfigProvider>
   );

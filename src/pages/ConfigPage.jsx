@@ -3,6 +3,7 @@ import { Card, Form, Button, message, Select, Spin, Typography, Segmented } from
 import { SaveOutlined } from '@ant-design/icons';
 import api from '../api';
 import { formatApiError } from '../utils/formatApiError';
+import { brand } from '../theme';
 
 const { Text } = Typography;
 
@@ -105,7 +106,7 @@ const ConfigPage = () => {
             </Form.Item>
           )}
 
-          <Card size="small" style={{ marginBottom: 16, background: '#F8FAFC' }}>
+          <Card size="small" style={{ marginBottom: 16, background: brand.paper }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               <Text strong>How this works</Text>
               <Text type="secondary">Single store: uses store-scoped endpoints with `X-Store-Id`.</Text>

@@ -6,6 +6,7 @@ import { useDashboardPeriod } from '../context/DashboardPeriodContext';
 import { useStoreView } from '../context/StoreViewContext';
 import { formatInr } from '../utils/orderFields';
 import { formatApiError } from '../utils/formatApiError';
+import { brand } from '../theme';
 
 const { Title, Text } = Typography;
 
@@ -74,24 +75,24 @@ const AccountingPage = () => {
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: 16,
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(255, 255, 255, 0.95) 55%)',
-            border: '1px solid rgba(99, 102, 241, 0.15)',
+            background: 'linear-gradient(135deg, rgba(250, 119, 0, 0.08) 0%, rgba(255, 255, 255, 0.95) 55%)',
+            border: '1px solid rgba(250, 119, 0, 0.15)',
           }}
         >
           <div>
             <Space align="center" style={{ marginBottom: 8 }} wrap>
               <Tag
                 icon={<SafetyCertificateOutlined />}
-                color="cyan"
+                color="orange"
                 style={{ borderRadius: 20, fontWeight: 700, border: 'none', padding: '2px 12px' }}
               >
                 Reconciliation
               </Tag>
               <Text type="secondary" style={{ fontSize: 13 }}>
-                Period: <strong style={{ color: '#0F172A' }}>{periodLabel}</strong> (IST)
+                Period: <strong style={{ color: brand.ink }}>{periodLabel}</strong> (IST)
               </Text>
             </Space>
-            <Title level={2} style={{ margin: 0, color: '#0F172A', fontSize: 28, fontWeight: 800 }}>
+            <Title level={2} style={{ margin: 0, color: brand.ink, fontSize: 28, fontWeight: 800 }}>
               Accounting & Settlement
             </Title>
             <Text type="secondary" style={{ fontSize: 15 }}>
@@ -115,7 +116,7 @@ const AccountingPage = () => {
           >
             <Row gutter={[24, 24]}>
               <Col xs={24} md={12}>
-                <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: '#475569' }}>
+                <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: brand.ink2 }}>
                   <BankOutlined /> Sales Breakdown
                 </Title>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -129,7 +130,7 @@ const AccountingPage = () => {
                   </div>
                   <div>
                     <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>Total Tax</Text>
-                    <Text strong style={{ fontSize: 18, color: '#F59E0B' }}>{formatInr(store.totalTax)}</Text>
+                    <Text strong style={{ fontSize: 18, color: brand.yellow }}>{formatInr(store.totalTax)}</Text>
                   </div>
                   <div>
                     <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>Takeaway Charges</Text>
@@ -139,27 +140,27 @@ const AccountingPage = () => {
 
                 <Divider />
 
-                <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: '#475569' }}>
+                <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: brand.ink2 }}>
                   <CreditCardOutlined /> Tender Mix
                 </Title>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
                   <div>
                     <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>UPI (QR)</Text>
-                    <Text strong style={{ fontSize: 16, color: '#6366F1' }}>{formatInr(store.totalUpi)}</Text>
+                    <Text strong style={{ fontSize: 16, color: brand.orange }}>{formatInr(store.totalUpi)}</Text>
                   </div>
                   <div>
                     <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>Card (EDC)</Text>
-                    <Text strong style={{ fontSize: 16, color: '#6366F1' }}>{formatInr(store.totalCard)}</Text>
+                    <Text strong style={{ fontSize: 16, color: brand.orange }}>{formatInr(store.totalCard)}</Text>
                   </div>
                   <div>
                     <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>Cash + Manual</Text>
-                    <Text strong style={{ fontSize: 16, color: '#10B981' }}>{formatInr(store.totalCash)}</Text>
+                    <Text strong style={{ fontSize: 16, color: brand.ok }}>{formatInr(store.totalCash)}</Text>
                   </div>
                 </div>
               </Col>
 
               <Col xs={24} md={12}>
-                <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: '#475569' }}>
+                <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: brand.ink2 }}>
                   <CreditCardOutlined /> PineLabs Settlement (Card)
                 </Title>
                 {store.pineLabsSettlement && store.pineLabsSettlement.length > 0 ? (
@@ -176,7 +177,7 @@ const AccountingPage = () => {
 
                 <Divider />
 
-                <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: '#475569' }}>
+                <Title level={5} style={{ marginTop: 0, marginBottom: 16, color: brand.ink2 }}>
                   <MoneyCollectOutlined /> Cash Settlement by Staff
                 </Title>
                 {store.cashSettlement && store.cashSettlement.length > 0 ? (

@@ -4,6 +4,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, GiftOutlined } from '@ant-d
 import dayjs from 'dayjs';
 import api from '../api';
 import { formatApiError } from '../utils/formatApiError';
+import { brand } from '../theme';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -130,7 +131,7 @@ const DiscountsPage = () => {
       title: 'Code',
       dataIndex: 'code',
       key: 'code',
-      render: (text) => <Tag color="blue">{text}</Tag>,
+      render: (text) => <Tag color="orange">{text}</Tag>,
     },
     {
       title: 'Discount Type',
@@ -189,7 +190,7 @@ const DiscountsPage = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>
-          <GiftOutlined style={{ marginRight: 8, color: '#6366F1' }} />
+          <GiftOutlined style={{ marginRight: 8, color: brand.orange }} />
           Discount Management
         </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
