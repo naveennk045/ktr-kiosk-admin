@@ -5,6 +5,7 @@ import {
   EyeOutlined,
   ReloadOutlined,
   TransactionOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
 import api from '../api';
 import OrderDetailsDrawer from '../components/OrderDetailsDrawer';
@@ -12,6 +13,8 @@ import { formatIst, formatInr, getKotCode, getOrderType, getPaymentType } from '
 import { formatApiError } from '../utils/formatApiError';
 import { useDashboardPeriod } from '../context/DashboardPeriodContext';
 import { useStoreView } from '../context/StoreViewContext';
+import { downloadCsv, toCsv } from '../utils/csv';
+import { brand } from '../theme';
 
 function toApiSortBy(field) {
   if (field === 'amount' || field === 'total_amount') return 'amount';
@@ -119,13 +122,37 @@ const TransactionsPage = () => {
     }
   };
 
+  /** Export exactly the rows on screen (current page, current filters and search). */
+  const exportCsv = () => {
+    if (data.length === 0) return;
+    const csv = toCsv(
+      [
+        { title: 'Store', value: (r) => r.store_name || r.storeName || r.store_code || r.storeCode || '' },
+        { title: 'Order ID', value: (r) => r.orderRefId },
+        { title: 'KOT code', value: (r) => (getKotCode(r) === '—' ? '' : getKotCode(r)) },
+        { title: 'Date (IST)', value: (r) => (r.createdAt ? formatIst(r.createdAt) : '') },
+        { title: 'Order type', value: (r) => (getOrderType(r) === '—' ? '' : getOrderType(r)) },
+        { title: 'Payment type', value: (r) => (getPaymentType(r) === '—' ? '' : getPaymentType(r)) },
+        { title: 'Amount (INR)', value: (r) => (Number.isFinite(Number(r.amount)) ? Number(r.amount) : '') },
+      ],
+      data
+    );
+    const range = period === 'custom_range' && fromDate && toDate ? `${fromDate}_to_${toDate}` : period;
+    const now = new Date();
+    const two = (v) => String(v).padStart(2, '0');
+    const stamp = `${now.getFullYear()}${two(now.getMonth() + 1)}${two(now.getDate())}-${two(now.getHours())}${two(now.getMinutes())}`;
+    const pagePart = pagination.total > data.length ? `-page${pagination.current}` : '';
+    downloadCsv(`ktr-transactions-${range}${pagePart}-${stamp}.csv`, csv);
+    message.success(`Exported ${data.length} row${data.length === 1 ? '' : 's'}`);
+  };
+
   const columns = [
     {
       title: 'Store',
       key: 'store',
       width: 180,
       render: (_, record) => (
-        <Text style={{ color: '#334155', fontSize: '13px' }}>
+        <Text style={{ color: brand.ink2, fontSize: '13px' }}>
           {record.store_name || record.storeName || record.store_code || record.storeCode || '—'}
         </Text>
       ),
@@ -141,7 +168,7 @@ const TransactionsPage = () => {
           style={{
             fontSize: '13px',
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-            color: '#0F172A',
+            color: brand.ink,
           }}
         >
           {id}
@@ -153,7 +180,7 @@ const TransactionsPage = () => {
       key: 'kot',
       width: 120,
       render: (_, record) => (
-        <Text style={{ color: '#334155', fontSize: '13px' }}>{getKotCode(record)}</Text>
+        <Text style={{ color: brand.ink2, fontSize: '13px' }}>{getKotCode(record)}</Text>
       ),
     },
     {
@@ -161,7 +188,7 @@ const TransactionsPage = () => {
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 200,
-      render: (text) => <Text style={{ color: '#0F172A', fontSize: '13px' }}>{formatIst(text)}</Text>,
+      render: (text) => <Text style={{ color: brand.ink, fontSize: '13px' }}>{formatIst(text)}</Text>,
       sorter: true,
     },
     {
@@ -172,9 +199,9 @@ const TransactionsPage = () => {
         <Tag
           style={{
             margin: 0,
-            background: 'rgba(99, 102, 241, 0.1)',
-            border: '1px solid rgba(99, 102, 241, 0.2)',
-            color: '#4F46E5',
+            background: 'rgba(250, 119, 0, 0.1)',
+            border: '1px solid rgba(250, 119, 0, 0.2)',
+            color: brand.orangeInk,
             borderRadius: 6,
             fontWeight: 600,
             fontSize: '12px',
@@ -189,7 +216,7 @@ const TransactionsPage = () => {
       key: 'paymentType',
       width: 130,
       render: (_, record) => (
-        <Text style={{ color: '#64748B', fontSize: '13px', fontWeight: 600 }}>
+        <Text style={{ color: brand.muted, fontSize: '13px', fontWeight: 600 }}>
           {getPaymentType(record)}
         </Text>
       ),
@@ -201,7 +228,7 @@ const TransactionsPage = () => {
       align: 'right',
       width: 120,
       render: (amount) => (
-        <Text strong style={{ color: '#0F172A', fontSize: '14px' }}>
+        <Text strong style={{ color: brand.ink, fontSize: '14px' }}>
           {formatInr(amount)}
         </Text>
       ),
@@ -242,10 +269,10 @@ const TransactionsPage = () => {
       >
         <div>
           <Space align="center" style={{ marginBottom: 4 }}>
-            <TransactionOutlined style={{ color: '#6366F1' }} />
+            <TransactionOutlined style={{ color: brand.orangeInk }} />
             <Text
               style={{
-                color: '#6366F1',
+                color: brand.orangeInk,
                 fontWeight: 800,
                 fontSize: '12px',
                 letterSpacing: '1px',
@@ -255,7 +282,7 @@ const TransactionsPage = () => {
               Orders
             </Text>
           </Space>
-          <Title level={2} style={{ margin: 0, color: '#0F172A', fontSize: '28px', fontWeight: 800 }}>
+          <Title level={2} style={{ margin: 0, color: brand.ink, fontSize: '28px', fontWeight: 800 }}>
             Transactions
           </Title>
           <Text type="secondary">
@@ -267,7 +294,7 @@ const TransactionsPage = () => {
           <Space size={16} wrap>
             <Input
               placeholder="Search order ID…"
-              prefix={<SearchOutlined style={{ color: '#94A3B8' }} />}
+              prefix={<SearchOutlined style={{ color: brand.muted }} />}
               allowClear
               style={{
                 width: 320,
@@ -287,6 +314,22 @@ const TransactionsPage = () => {
                 }
                 style={{ height: 44, width: 44, borderRadius: 10 }}
               />
+            </Tooltip>
+            <Tooltip
+              title={
+                pagination.total > data.length
+                  ? `Exports the ${data.length} rows on this page (of ${pagination.total}). Raise rows per page to export more.`
+                  : 'Exports the rows shown below'
+              }
+            >
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={exportCsv}
+                disabled={loading || data.length === 0}
+                style={{ height: 44, borderRadius: 10 }}
+              >
+                Export CSV
+              </Button>
             </Tooltip>
           </Space>
         </div>

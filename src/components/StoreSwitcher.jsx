@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ShopOutlined, CheckOutlined, LoadingOutlined, GlobalOutlined, DownOutlined } from '@ant-design/icons';
 import api from '../api';
 import { useStoreView } from '../context/StoreViewContext';
+import { brand } from '../theme';
 
 const StoreSwitcher = () => {
   const { viewMode, setViewMode, selectedStoreCodes, setSelectedStoreCodes, singleStoreCode, setSingleStoreCode } = useStoreView();
@@ -77,9 +78,9 @@ const StoreSwitcher = () => {
           alignItems: 'center',
           gap: 8,
           background: open
-            ? 'rgba(99,102,241,0.12)'
-            : 'rgba(99,102,241,0.06)',
-          border: '1px solid rgba(99,102,241,0.20)',
+            ? 'rgba(250, 119, 0,0.12)'
+            : 'rgba(250, 119, 0,0.06)',
+          border: '1px solid rgba(250, 119, 0,0.20)',
           borderRadius: 10,
           padding: '7px 14px 7px 10px',
           cursor: 'pointer',
@@ -88,20 +89,20 @@ const StoreSwitcher = () => {
           minWidth: 150,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(99,102,241,0.12)';
-          e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)';
+          e.currentTarget.style.background = 'rgba(250, 119, 0,0.12)';
+          e.currentTarget.style.borderColor = 'rgba(250, 119, 0,0.35)';
         }}
         onMouseLeave={(e) => {
           if (!open) {
-            e.currentTarget.style.background = 'rgba(99,102,241,0.06)';
-            e.currentTarget.style.borderColor = 'rgba(99,102,241,0.20)';
+            e.currentTarget.style.background = 'rgba(250, 119, 0,0.06)';
+            e.currentTarget.style.borderColor = 'rgba(250, 119, 0,0.20)';
           }
         }}
       >
         {/* icon */}
         <span style={{
           width: 28, height: 28,
-          background: 'linear-gradient(135deg,#6366F1,#818CF8)',
+          background: 'linear-gradient(135deg,var(--ktr-orange),var(--ktr-yellow))',
           borderRadius: 7,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
@@ -113,17 +114,17 @@ const StoreSwitcher = () => {
 
         {/* label stack */}
         <span style={{ flex: 1, textAlign: 'left' }}>
-          <span style={{ display: 'block', fontSize: 10, color: '#6366F1', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1 }}>
+          <span style={{ display: 'block', fontSize: 10, color: brand.orange, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1 }}>
             {isMulti ? 'Multi-store' : 'Single store'}
           </span>
-          <span style={{ display: 'block', fontSize: 13, color: '#0F172A', fontWeight: 600, marginTop: 2, lineHeight: 1 }}>
+          <span style={{ display: 'block', fontSize: 13, color: brand.ink, fontWeight: 600, marginTop: 2, lineHeight: 1 }}>
             {loading ? <LoadingOutlined style={{ fontSize: 11 }} /> : activeLabel()}
           </span>
         </span>
 
         {/* caret */}
         <DownOutlined style={{
-          fontSize: 10, color: '#6366F1', flexShrink: 0,
+          fontSize: 10, color: brand.orange, flexShrink: 0,
           transform: open ? 'rotate(180deg)' : 'rotate(0)',
           transition: 'transform 0.18s ease',
         }} />
@@ -138,23 +139,23 @@ const StoreSwitcher = () => {
             left: 0,
             zIndex: 9999,
             background: '#ffffff',
-            border: '1px solid #E2E8F0',
+            border: '1px solid var(--ktr-line)',
             borderRadius: 14,
-            boxShadow: '0 16px 48px -8px rgba(15,23,42,0.18)',
+            boxShadow: '0 16px 48px -8px rgba(77, 40, 10,0.18)',
             minWidth: 240,
             overflow: 'hidden',
             animation: 'storeDrop 0.18s ease',
           }}
         >
           {/* header */}
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #F1F5F9' }}>
-            <p style={{ margin: 0, fontSize: 11, color: '#64748B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ktr-paper)' }}>
+            <p style={{ margin: 0, fontSize: 11, color: brand.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Switch View
             </p>
           </div>
 
           {/* mode toggle row */}
-          <div style={{ padding: '10px 14px', display: 'flex', gap: 8, borderBottom: '1px solid #F1F5F9' }}>
+          <div style={{ padding: '10px 14px', display: 'flex', gap: 8, borderBottom: '1px solid var(--ktr-paper)' }}>
             {['single', 'multi'].map((mode) => (
               <button
                 key={mode}
@@ -166,10 +167,10 @@ const StoreSwitcher = () => {
                   flex: 1,
                   padding: '6px 0',
                   border: '1px solid',
-                  borderColor: viewMode === mode ? '#6366F1' : '#E2E8F0',
+                  borderColor: viewMode === mode ? brand.orange : brand.line,
                   borderRadius: 8,
-                  background: viewMode === mode ? '#6366F1' : 'transparent',
-                  color: viewMode === mode ? '#fff' : '#64748B',
+                  background: viewMode === mode ? brand.orange : 'transparent',
+                  color: viewMode === mode ? '#fff' : brand.muted,
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -186,11 +187,11 @@ const StoreSwitcher = () => {
           {/* store list */}
           <div style={{ maxHeight: 240, overflowY: 'auto', padding: '6px 0' }}>
             {loading ? (
-              <div style={{ padding: '16px', textAlign: 'center', color: '#94A3B8', fontSize: 13 }}>
+              <div style={{ padding: '16px', textAlign: 'center', color: brand.muted, fontSize: 13 }}>
                 <LoadingOutlined /> Loading stores…
               </div>
             ) : stores.length === 0 ? (
-              <div style={{ padding: '16px', textAlign: 'center', color: '#94A3B8', fontSize: 13 }}>
+              <div style={{ padding: '16px', textAlign: 'center', color: brand.muted, fontSize: 13 }}>
                 No stores found
               </div>
             ) : (
@@ -210,7 +211,7 @@ const StoreSwitcher = () => {
                       gap: 10,
                       padding: '9px 16px',
                       border: 'none',
-                      background: selected ? 'rgba(99,102,241,0.07)' : 'transparent',
+                      background: selected ? 'rgba(250, 119, 0,0.07)' : 'transparent',
                       cursor: 'pointer',
                       textAlign: 'left',
                       transition: 'background 0.15s ease',
@@ -218,37 +219,37 @@ const StoreSwitcher = () => {
                       fontFamily: 'inherit',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(99,102,241,0.05)';
+                      e.currentTarget.style.background = 'rgba(250, 119, 0,0.05)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = selected ? 'rgba(99,102,241,0.07)' : 'transparent';
+                      e.currentTarget.style.background = selected ? 'rgba(250, 119, 0,0.07)' : 'transparent';
                     }}
                   >
                     {/* store icon */}
                     <span style={{
                       width: 32, height: 32, borderRadius: 8, flexShrink: 0,
                       background: selected
-                        ? 'linear-gradient(135deg,#6366F1,#818CF8)'
-                        : '#F1F5F9',
+                        ? 'linear-gradient(135deg,var(--ktr-orange),var(--ktr-yellow))'
+                        : brand.paper,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       transition: 'background 0.15s ease',
                     }}>
-                      <ShopOutlined style={{ fontSize: 14, color: selected ? '#fff' : '#64748B' }} />
+                      <ShopOutlined style={{ fontSize: 14, color: selected ? '#fff' : brand.muted }} />
                     </span>
 
                     {/* store info */}
                     <span style={{ flex: 1 }}>
-                      <span style={{ display: 'block', fontSize: 13, color: '#0F172A', fontWeight: 600, lineHeight: 1 }}>
+                      <span style={{ display: 'block', fontSize: 13, color: brand.ink, fontWeight: 600, lineHeight: 1 }}>
                         {store.store_name}
                       </span>
-                      <span style={{ display: 'block', fontSize: 11, color: '#94A3B8', marginTop: 2 }}>
+                      <span style={{ display: 'block', fontSize: 11, color: brand.muted, marginTop: 2 }}>
                         {store.store_code}
                       </span>
                     </span>
 
                     {/* checkmark */}
                     {selected && (
-                      <CheckOutlined style={{ fontSize: 12, color: '#6366F1', flexShrink: 0 }} />
+                      <CheckOutlined style={{ fontSize: 12, color: brand.orange, flexShrink: 0 }} />
                     )}
                   </button>
                 );
@@ -258,7 +259,7 @@ const StoreSwitcher = () => {
 
           {/* footer hint */}
           {isMulti && (
-            <div style={{ padding: '10px 16px', borderTop: '1px solid #F1F5F9', fontSize: 11, color: '#94A3B8', textAlign: 'center' }}>
+            <div style={{ padding: '10px 16px', borderTop: '1px solid var(--ktr-paper)', fontSize: 11, color: brand.muted, textAlign: 'center' }}>
               {selectedStoreCodes.length === 0
                 ? 'No filter — showing all stores'
                 : `${selectedStoreCodes.length} store${selectedStoreCodes.length > 1 ? 's' : ''} selected`}

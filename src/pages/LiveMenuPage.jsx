@@ -10,6 +10,7 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import api from '../api';
+import { brand } from '../theme';
 
 const { Title, Text } = Typography;
 
@@ -106,7 +107,7 @@ const LiveMenuPage = () => {
       await api.post('/itemdetails/', payload);
       message.success({
         content: 'Live menu updated successfully! The kiosk catalog cache has been refreshed.',
-        icon: <CheckCircleOutlined style={{ color: '#10B981' }} />
+        icon: <CheckCircleOutlined style={{ color: brand.ok }} />
       });
     } catch (err) {
       console.error('Failed to publish live menu', err);
@@ -148,9 +149,9 @@ const LiveMenuPage = () => {
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: 16,
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 0.95) 55%)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
-            boxShadow: '0 4px 24px -6px rgba(16, 185, 129, 0.1)',
+            background: 'linear-gradient(135deg, rgba(47, 125, 50, 0.08) 0%, rgba(255, 255, 255, 0.95) 55%)',
+            border: '1px solid rgba(47, 125, 50, 0.2)',
+            boxShadow: '0 4px 24px -6px rgba(47, 125, 50, 0.1)',
             position: 'sticky',
             top: 80,
             zIndex: 90,
@@ -161,13 +162,13 @@ const LiveMenuPage = () => {
             <Space align="center" style={{ marginBottom: 8 }} wrap>
               <Tag
                 icon={<RocketOutlined />}
-                color="emerald"
-                style={{ borderRadius: 20, fontWeight: 700, border: 'none', padding: '4px 14px', background: '#10B981', color: '#fff' }}
+                color="orange"
+                style={{ borderRadius: 20, fontWeight: 700, border: 'none', padding: '4px 14px', background: brand.ok, color: '#fff' }}
               >
                 Immediate Availability
               </Tag>
             </Space>
-            <Title level={2} style={{ margin: 0, color: '#0F172A', fontSize: 26, fontWeight: 800 }}>
+            <Title level={2} style={{ margin: 0, color: brand.ink, fontSize: 26, fontWeight: 800 }}>
               Live Menu Manager
             </Title>
             <Text type="secondary" style={{ fontSize: 14 }}>
@@ -206,10 +207,10 @@ const LiveMenuPage = () => {
               loading={saving}
               style={{
                 borderRadius: 8,
-                background: 'linear-gradient(90deg, #10B981, #059669)',
+                background: 'linear-gradient(90deg, var(--ktr-ok), var(--ktr-ok))',
                 border: 'none',
                 fontWeight: 700,
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                boxShadow: '0 4px 12px rgba(47, 125, 50, 0.3)',
                 height: 40,
                 padding: '0 24px'
               }}
@@ -236,24 +237,24 @@ const LiveMenuPage = () => {
                     styles={{ body: { padding: 0 } }}
                     style={{
                       borderRadius: 16,
-                      border: '1px solid rgba(226, 232, 240, 0.8)',
+                      border: '1px solid rgba(234, 217, 199, 0.8)',
                       overflow: 'hidden',
-                      boxShadow: '0 2px 12px -4px rgba(15, 23, 42, 0.05)'
+                      boxShadow: '0 2px 12px -4px rgba(77, 40, 10, 0.05)'
                     }}
                   >
                     {/* Category Header */}
                     <div style={{
                       padding: '16px 24px',
-                      background: 'rgba(248, 250, 252, 0.8)',
-                      borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+                      background: 'rgba(251, 243, 234, 0.8)',
+                      borderBottom: '1px solid rgba(234, 217, 199, 0.8)',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center'
                     }}>
                       <Space>
                         <div style={{
-                          background: '#E0E7FF',
-                          color: '#4F46E5',
+                          background: brand.peach,
+                          color: brand.orangeInk,
                           width: 36,
                           height: 36,
                           borderRadius: 10,
@@ -265,7 +266,7 @@ const LiveMenuPage = () => {
                           <AppstoreOutlined />
                         </div>
                         <div>
-                          <Text strong style={{ fontSize: 16, color: '#1E293B', display: 'block' }}>
+                          <Text strong style={{ fontSize: 16, color: brand.ink, display: 'block' }}>
                             {category.categoryname}
                           </Text>
                           <Text type="secondary" style={{ fontSize: 12 }}>
@@ -275,13 +276,13 @@ const LiveMenuPage = () => {
                       </Space>
                       
                       <Space>
-                        <Text strong style={{ fontSize: 13, color: isAllSelected ? '#10B981' : '#64748B' }}>
+                        <Text strong style={{ fontSize: 13, color: isAllSelected ? brand.ok : brand.muted }}>
                           {isAllSelected ? 'Category Active' : 'Toggle Category'}
                         </Text>
                         <Switch 
                           checked={isAllSelected} 
                           onChange={(checked) => handleToggleCategory(category.categoryid, checked)}
-                          style={{ background: isAllSelected ? '#10B981' : undefined }}
+                          style={{ background: isAllSelected ? brand.ok : undefined }}
                         />
                       </Space>
                     </div>
@@ -296,26 +297,26 @@ const LiveMenuPage = () => {
                               <div style={{
                                 padding: '16px',
                                 borderRadius: 12,
-                                border: `1px solid ${isSelected ? 'rgba(16, 185, 129, 0.4)' : 'rgba(226, 232, 240, 0.8)'}`,
-                                background: isSelected ? 'rgba(16, 185, 129, 0.04)' : '#FFFFFF',
+                                border: `1px solid ${isSelected ? 'rgba(47, 125, 50, 0.4)' : 'rgba(234, 217, 199, 0.8)'}`,
+                                background: isSelected ? 'rgba(47, 125, 50, 0.04)' : '#FFFFFF',
                                 transition: 'all 0.2s ease',
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'flex-start',
                                 height: '100%',
-                                boxShadow: isSelected ? '0 4px 12px -4px rgba(16, 185, 129, 0.15)' : 'none'
+                                boxShadow: isSelected ? '0 4px 12px -4px rgba(47, 125, 50, 0.15)' : 'none'
                               }}>
                                 <div style={{ flex: 1, paddingRight: 12 }}>
                                   <Text strong style={{ 
                                     display: 'block', 
-                                    color: isSelected ? '#0F172A' : '#64748B',
+                                    color: isSelected ? brand.ink : brand.muted,
                                     marginBottom: 4,
                                     fontSize: 14
                                   }}>
                                     {item.itemname}
                                   </Text>
                                   <Text style={{ 
-                                    color: isSelected ? '#059669' : '#94A3B8', 
+                                    color: isSelected ? brand.ok : brand.muted, 
                                     fontWeight: 600,
                                     fontSize: 13 
                                   }}>
@@ -326,7 +327,7 @@ const LiveMenuPage = () => {
                                   checked={isSelected}
                                   onChange={(checked) => handleToggleItem(item.itemid, checked)}
                                   size="small"
-                                  style={{ background: isSelected ? '#10B981' : undefined, marginTop: 4 }}
+                                  style={{ background: isSelected ? brand.ok : undefined, marginTop: 4 }}
                                 />
                               </div>
                             </Col>

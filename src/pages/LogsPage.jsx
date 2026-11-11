@@ -7,12 +7,14 @@ import {
 } from '@ant-design/icons';
 import { JsonView, defaultStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
-import api from '../api';
+import api, { API_BASE_URL } from '../api';
+import { getToken } from '../authSession';
 import { formatApiError } from '../utils/formatApiError';
 import {
   detailFields, formatDuration, formatTime, groupByRequest, levelRank, parseTime, shortId, summarize, withIds,
 } from '../utils/logGroups';
 import './LogsPage.css';
+import { brand } from '../theme';
 
 const { Text, Title } = Typography;
 
@@ -43,18 +45,18 @@ const MAX_KEPT = 5000;
 
 function levelTag(level) {
   const l = String(level || '').toUpperCase();
-  const color = { ERROR: 'red', CRITICAL: 'red', WARNING: 'orange', WARN: 'orange', DEBUG: 'default' }[l] || 'blue';
+  const color = { ERROR: 'red', CRITICAL: 'red', WARNING: 'orange', WARN: 'orange', DEBUG: 'default' }[l] || 'default';
   return <Tag color={color} className="lg-level">{l || '—'}</Tag>;
 }
 
 function statusTag(status) {
   if (!status) return <Tag className="lg-status">—</Tag>;
-  const color = status >= 500 ? 'red' : status >= 400 ? 'orange' : status >= 300 ? 'blue' : 'green';
+  const color = status >= 500 ? 'red' : status >= 400 ? 'orange' : status >= 300 ? 'gold' : 'green';
   return <Tag color={color} className="lg-status">{status}</Tag>;
 }
 
 function methodTag(method) {
-  const color = { GET: 'geekblue', POST: 'purple', PATCH: 'cyan', PUT: 'cyan', DELETE: 'red' }[method] || 'default';
+  const color = { GET: 'default', POST: 'gold', PATCH: 'lime', PUT: 'lime', DELETE: 'red' }[method] || 'default';
   return <Tag color={color} className="lg-method">{method}</Tag>;
 }
 
@@ -187,9 +189,13 @@ const LogsPage = () => {
 
   const startLive = useCallback(() => {
     esRef.current?.close();
-    const base = selectedEnv || String(import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+    const base = (selectedEnv || API_BASE_URL).replace(/\/$/, '');
     const q = new URLSearchParams({ initial_lines: '0' });
     for (const [k, v] of Object.entries(params)) if (v !== undefined && k !== 'lines') q.set(k, String(v));
+    // EventSource cannot send headers, so this one URL carries the session token as a query parameter.
+    // Only for our own API: the token is never sent to another environment.
+    const token = selectedEnv ? null : getToken();
+    if (token) q.set('access_token', token);
     const es = new EventSource(`${base}/admin/logs/stream?${q}`);
     es.onmessage = (evt) => {
       try {
@@ -292,8 +298,8 @@ const LogsPage = () => {
       render: (_, g) => (
         <Space size={4}>
           <span>{g.entries.length}</span>
-          {g.errorCount > 0 && <Badge count={g.errorCount} color="#ef4444" />}
-          {g.warnCount > 0 && <Badge count={g.warnCount} color="#f59e0b" />}
+          {g.errorCount > 0 && <Badge count={g.errorCount} color={brand.maroon} />}
+          {g.warnCount > 0 && <Badge count={g.warnCount} color={brand.yellow} />}
         </Space>
       ),
     },

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Typography, Divider, Collapse, Space, List, Tag } from 'antd';
 import { BookOutlined, RocketOutlined, DashboardOutlined, TransactionOutlined, ShoppingOutlined, SettingOutlined, BankOutlined } from '@ant-design/icons';
+import { brand } from '../theme';
 
 const { Title, Text, Paragraph } = Typography;
 const { Panel } = Collapse;
@@ -9,12 +10,12 @@ const UserDocsPage = () => {
   return (
     <div className="animate-fade-in" style={{ paddingBottom: 24, maxWidth: 900, margin: '0 auto' }}>
       <Space align="center" style={{ marginBottom: 4 }}>
-        <BookOutlined style={{ color: '#6366F1' }} />
-        <Text style={{ color: '#6366F1', fontWeight: 800, fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>
+        <BookOutlined style={{ color: brand.orange }} />
+        <Text style={{ color: brand.orange, fontWeight: 800, fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>
           Documentation
         </Text>
       </Space>
-      <Title level={2} style={{ margin: 0, color: '#0F172A', fontSize: '28px', fontWeight: 800 }}>
+      <Title level={2} style={{ margin: 0, color: brand.ink, fontSize: '28px', fontWeight: 800 }}>
         User Guide
       </Title>
       <Paragraph type="secondary" style={{ marginTop: 8, fontSize: '15px' }}>
@@ -24,7 +25,7 @@ const UserDocsPage = () => {
       <Card className="premium-card" style={{ marginTop: 24, borderRadius: 16 }}>
         <Collapse ghost defaultActiveKey={['1']} expandIconPosition="end">
           <Panel 
-            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><DashboardOutlined style={{ marginRight: 8, color: '#6366F1' }} /> Dashboard & Analytics</span>} 
+            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><DashboardOutlined style={{ marginRight: 8, color: brand.orange }} /> Dashboard & Analytics</span>} 
             key="1"
           >
             <Paragraph>
@@ -44,7 +45,7 @@ const UserDocsPage = () => {
           </Panel>
 
           <Panel 
-            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><TransactionOutlined style={{ marginRight: 8, color: '#6366F1' }} /> Transactions</span>} 
+            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><TransactionOutlined style={{ marginRight: 8, color: brand.orange }} /> Transactions</span>} 
             key="2"
           >
             <Paragraph>
@@ -65,7 +66,7 @@ const UserDocsPage = () => {
           </Panel>
 
           <Panel 
-            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><ShoppingOutlined style={{ marginRight: 8, color: '#6366F1' }} /> Item & Category Analysis</span>} 
+            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><ShoppingOutlined style={{ marginRight: 8, color: brand.orange }} /> Item & Category Analysis</span>} 
             key="3"
           >
             <Paragraph>
@@ -84,7 +85,7 @@ const UserDocsPage = () => {
           </Panel>
 
           <Panel 
-            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><BankOutlined style={{ marginRight: 8, color: '#6366F1' }} /> Accounting & Settlement</span>} 
+            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><BankOutlined style={{ marginRight: 8, color: brand.orange }} /> Accounting & Settlement</span>} 
             key="4"
           >
             <Paragraph>
@@ -102,7 +103,7 @@ const UserDocsPage = () => {
           </Panel>
 
           <Panel 
-            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><SettingOutlined style={{ marginRight: 8, color: '#6366F1' }} /> Configuration & Menu</span>} 
+            header={<span style={{ fontWeight: 600, fontSize: '16px' }}><SettingOutlined style={{ marginRight: 8, color: brand.orange }} /> Configuration & Menu</span>} 
             key="5"
           >
             <Paragraph>
@@ -121,9 +122,9 @@ const UserDocsPage = () => {
         </Collapse>
       </Card>
 
-      <div style={{ textAlign: 'center', marginTop: 40, color: '#94A3B8' }}>
+      <div style={{ textAlign: 'center', marginTop: 40, color: brand.muted }}>
         <RocketOutlined style={{ fontSize: 24, marginBottom: 8 }} />
-        <Paragraph style={{ color: '#94A3B8' }}>KTR-ONE System version 1.0.0</Paragraph>
+        <Paragraph style={{ color: brand.muted }}>KTR-ONE System version 1.0.0</Paragraph>
       </div>
     </div>
   );

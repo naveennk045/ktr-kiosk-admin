@@ -48,6 +48,9 @@ Requires `X-Store-Id`.
 
 - `GET /analytics/summary?period=all_time|today|yesterday|last_week`
   - KPI summary based on completed orders only (IST windows).
+- `GET /analytics/insights?period=...&from_date=&to_date=&daypart=all|breakfast|lunch|evening`
+  - Everything the Insights page (`/insights`) shows: KPIs vs previous period, dine-in vs takeaway, best/slow items, movers, categories, hour x weekday heatmap, orders per day, habits, pairs, customisations, kitchen speed, rule-based suggestions.
+  - Completed orders only (IST windows). Field reference: `kiosk-server/docs/API.md`.
 
 ## Payments (`/payments`)
 
@@ -77,6 +80,9 @@ No `X-Store-Id` header usage.
 - `GET /admin/analytics/store-insights` (no store header)
   - Owner store insights: top items, AOV, payment split, top channel.
   - Query: `period`, `active_only`, optional `store_ids`, `store_codes`, `top_n` (default `5`).
+- `GET /admin/analytics/insights` (no store header)
+  - Same response as `GET /analytics/insights`, combined across stores (used by the Insights page in multi-store view).
+  - Query: `period`, `from_date`, `to_date`, `daypart`, `active_only`, optional `store_ids`, `store_codes`.
 - `GET /admin/transactions` (no store header)
   - Owner transaction grid across stores with filters/pagination.
   - Common filters: `page`, `size`, `sortBy`, `sortDir`, `period`, `store_ids`, `store_codes`, `order_type`, `payment_status`, `payment_method`, `kds_status`, `channel`, `terminal_id`, `search`, `min_amount`, `max_amount`.
