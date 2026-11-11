@@ -1,25 +1,25 @@
-/* KTR One — global brand styles. Fonts are loaded in index.html (Unbounded + Figtree).
+/* KTR One — global brand styles: the dark KDS / token-board look. Fonts are loaded in index.html (Unbounded + Figtree).
    Tokens mirror the kiosk (kiosk-client/src/styles/ktr.css) and `brand` in src/theme.js. */
 :root {
-  --ktr-paper: #fbf3ea;
-  --ktr-card: #ffffff;
-  --ktr-ink: #1b1513;
-  --ktr-ink-2: #4d3f37;
-  --ktr-muted: #7a685c;
-  --ktr-line: #ead9c7;
-  --ktr-peach: #f6dfc6;
+  --ktr-paper: #0b0a0a;
+  --ktr-card: #171313;
+  --ktr-ink: #f7efe6;
+  --ktr-ink-2: #d9cbbd;
+  --ktr-muted: #b9aa9c;
+  --ktr-line: #2f2826;
+  --ktr-peach: #2a211d;
   --ktr-orange: #fa7700;
-  --ktr-orange-ink: #c25700;
-  --ktr-orange-soft: #fff6ec;
+  --ktr-orange-ink: #ffb46b;
+  --ktr-orange-soft: rgba(250, 119, 0, 0.12);
   --ktr-yellow: #ffc41f;
   --ktr-wine: #803a4d;
-  --ktr-olive: #4d5e21;
-  --ktr-maroon: #7d1919;
-  --ktr-ok: #2f7d32;
+  --ktr-olive: #6f8a2f;
+  --ktr-maroon: #ff6b5e;
+  --ktr-ok: #8fd16a;
   --ktr-font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
   --ktr-font-body: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
-  --ktr-shadow: 0 18px 40px -22px rgba(77, 40, 10, 0.45);
-  --ktr-shadow-soft: 0 14px 32px -24px rgba(77, 40, 10, 0.45);
+  --ktr-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.8);
+  --ktr-shadow-soft: 0 18px 40px -24px rgba(0, 0, 0, 0.7);
   --ktr-plaid:
     repeating-linear-gradient(90deg, transparent 0 22px, rgba(77, 94, 33, 0.85) 22px 32px, transparent 32px 44px),
     repeating-linear-gradient(0deg, transparent 0 7px, rgba(246, 223, 198, 0.45) 7px 9px, transparent 9px 28px),
@@ -38,7 +38,7 @@
   font-family: var(--ktr-font-body);
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light;
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -50,7 +50,11 @@ body {
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--ktr-paper);
+  background:
+    radial-gradient(1200px 700px at 85% -10%, rgba(250, 119, 0, 0.12), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgba(128, 58, 77, 0.2), transparent 60%),
+    var(--ktr-paper);
+  background-attachment: fixed;
   color: var(--ktr-ink);
 }
 
@@ -81,7 +85,7 @@ h3.ant-typography { font-size: clamp(17px, 2vw, 20px) !important; }
   height: 72px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 20px;
   border-bottom: 1px solid var(--ktr-line); overflow: hidden; white-space: nowrap;
 }
-.ktr-brand img { height: 30px; width: auto; filter: invert(1); flex: none; }
+.ktr-brand img { height: 30px; width: auto; flex: none; }
 .ktr-brand .ktr-brand-name { font-family: var(--ktr-font-display); font-weight: 800; font-size: 15px; color: var(--ktr-ink); }
 .ktr-brand .ktr-brand-name em { font-style: normal; color: var(--ktr-orange); }
 .ktr-brand.is-collapsed { padding: 0; justify-content: center; }
@@ -184,4 +188,4 @@ h3.ant-typography { font-size: clamp(17px, 2vw, 20px) !important; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--ktr-paper); }
 ::-webkit-scrollbar-thumb { background: var(--ktr-line); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #d8c2ab; }
+::-webkit-scrollbar-thumb:hover { background: #4a3f3a; }

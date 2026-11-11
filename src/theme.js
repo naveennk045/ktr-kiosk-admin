@@ -1,25 +1,26 @@
 import { theme } from 'antd';
 
 /**
- * KTR brand tokens — the same palette as the self-order kiosk (kiosk-client/src/styles/ktr.css).
+ * KTR brand tokens — the dark, glassy look of the kitchen display and token board
+ * (kds-client/src/kds.css, tms-client/src/index.css).
  * Keep in sync with the CSS variables on :root in index.css. Use `brand` where a real colour value is
  * needed (chart strokes/fills, Ant props); use the CSS variables (var(--ktr-…)) in styles.
  */
 export const brand = {
-  paper: '#fbf3ea',
-  card: '#ffffff',
-  ink: '#1b1513',
-  ink2: '#4d3f37',
-  muted: '#7a685c',
-  line: '#ead9c7',
-  peach: '#f6dfc6',
+  paper: '#0b0a0a', // page background
+  card: '#171313', // cards, sidebar, header
+  ink: '#f7efe6', // main text
+  ink2: '#d9cbbd',
+  muted: '#b9aa9c',
+  line: '#2f2826',
+  peach: '#2a211d', // soft raised surface (tracks, hovers)
   orange: '#fa7700',
-  orangeInk: '#c25700',
+  orangeInk: '#ffb46b', // orange text on dark
   yellow: '#ffc41f',
   wine: '#803a4d',
-  olive: '#4d5e21',
-  maroon: '#7d1919',
-  ok: '#2f7d32',
+  olive: '#6f8a2f',
+  maroon: '#ff6b5e', // errors / falling
+  ok: '#8fd16a',
 };
 
 /** Series colours for charts, in the order they should be used. */
@@ -39,22 +40,22 @@ export const fontDisplay = '"Unbounded", "Arial Black", system-ui, sans-serif';
 export const fontBody =
   '"Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif';
 
-const softShadow = '0 14px 32px -24px rgba(77, 40, 10, 0.45)';
+const softShadow = '0 18px 40px -24px rgba(0, 0, 0, 0.7)';
 
-/** Light KTR theme: warm paper background, white cards, orange primary. No dark surfaces. */
+/** Dark KTR theme: near-black warm background, dark glass cards, orange primary. */
 export const ktrTheme = {
-  algorithm: theme.defaultAlgorithm,
+  algorithm: theme.darkAlgorithm,
   token: {
     colorPrimary: brand.orange,
     colorInfo: brand.orange,
     colorSuccess: brand.ok,
-    colorWarning: '#d99a00',
+    colorWarning: brand.yellow,
     colorError: brand.maroon,
     colorLink: brand.orangeInk,
-    colorBgBase: '#ffffff',
+    colorBgBase: brand.paper,
     colorBgContainer: brand.card,
     colorBgLayout: brand.paper,
-    colorBgElevated: brand.card,
+    colorBgElevated: '#1f1917',
     colorText: brand.ink,
     colorTextSecondary: brand.muted,
     colorTextTertiary: brand.muted,
@@ -66,7 +67,7 @@ export const ktrTheme = {
     fontFamily: fontBody,
     fontSize: 14,
     boxShadow: softShadow,
-    boxShadowSecondary: '0 18px 40px -22px rgba(77, 40, 10, 0.45)',
+    boxShadowSecondary: '0 24px 60px -24px rgba(0, 0, 0, 0.8)',
   },
   components: {
     Layout: {
@@ -83,10 +84,10 @@ export const ktrTheme = {
       headerFontSize: 16,
     },
     Table: {
-      headerBg: brand.paper,
+      headerBg: '#1f1917',
       headerColor: brand.muted,
       headerSplitColor: 'transparent',
-      rowHoverBg: '#fff8f0',
+      rowHoverBg: 'rgba(250, 119, 0, 0.08)',
       borderColor: brand.line,
       headerBorderRadius: 12,
     },
@@ -95,8 +96,8 @@ export const ktrTheme = {
       subMenuItemBg: 'transparent',
       itemColor: brand.ink2,
       itemHoverColor: brand.ink,
-      itemHoverBg: brand.paper,
-      itemActiveBg: brand.peach,
+      itemHoverBg: brand.peach,
+      itemActiveBg: 'rgba(250, 119, 0, 0.18)',
       itemSelectedBg: brand.orange,
       itemSelectedColor: '#1d0e00',
       groupTitleColor: brand.muted,
@@ -116,8 +117,8 @@ export const ktrTheme = {
     },
     Segmented: {
       trackBg: brand.peach,
-      itemSelectedBg: brand.card,
-      itemSelectedColor: brand.ink,
+      itemSelectedBg: brand.ink,
+      itemSelectedColor: '#0b0a0a',
       itemColor: brand.ink2,
     },
     Tabs: {
@@ -132,12 +133,12 @@ export const ktrTheme = {
       borderRadiusSM: 8,
     },
     Drawer: {
-      colorBgElevated: brand.card,
+      colorBgElevated: '#171313',
     },
     Input: { activeShadow: '0 0 0 3px rgba(250, 119, 0, 0.16)' },
-    Select: { optionSelectedBg: brand.peach },
+    Select: { optionSelectedBg: 'rgba(250, 119, 0, 0.18)' },
     Tooltip: {
-      colorBgSpotlight: brand.card,
+      colorBgSpotlight: '#2a211d',
       colorTextLightSolid: brand.ink,
     },
   },

@@ -121,7 +121,7 @@ const DashboardPage = () => {
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: 16,
-          background: 'linear-gradient(135deg, rgba(250, 119, 0, 0.08) 0%, rgba(255, 255, 255, 0.95) 55%)',
+          background: 'linear-gradient(135deg, rgba(250, 119, 0, 0.08) 0%, rgba(23, 19, 19, 0.95) 55%)',
           border: '1px solid rgba(250, 119, 0, 0.15)',
         }}
       >
@@ -351,10 +351,10 @@ const DashboardPage = () => {
                   <YAxis allowDecimals={false} stroke={brand.muted} axisLine={false} tickLine={false} style={{ fontSize: 12 }} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#FFFFFF',
+                      backgroundColor: '#1f1917',
                       border: '1px solid var(--ktr-line)',
                       borderRadius: 10,
-                      boxShadow: '0 10px 40px -10px rgba(77, 40, 10, 0.15)',
+                      boxShadow: '0 24px 60px -24px rgba(0, 0, 0, 0.8)',
                       color: brand.ink,
                     }}
                     itemStyle={{ color: brand.orange }}

@@ -11,7 +11,7 @@
 }
 .login-plaid { height: 14px; background: var(--ktr-plaid); }
 .login-body { padding: 32px 32px 28px; }
-.login-logo { height: 46px; width: auto; filter: invert(1); display: block; margin-bottom: 18px; }
+.login-logo { height: 46px; width: auto; display: block; margin-bottom: 18px; }
 .login-title { margin: 0; font-family: var(--ktr-font-display); font-weight: 800; font-size: 28px; line-height: 1.1; letter-spacing: -0.02em; color: var(--ktr-ink); }
 .login-title em { font-style: normal; color: var(--ktr-orange); }
 .login-sub { margin: 8px 0 24px; color: var(--ktr-muted); font-size: 15px; }

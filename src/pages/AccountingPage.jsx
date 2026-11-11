@@ -75,7 +75,7 @@ const AccountingPage = () => {
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: 16,
-            background: 'linear-gradient(135deg, rgba(250, 119, 0, 0.08) 0%, rgba(255, 255, 255, 0.95) 55%)',
+            background: 'linear-gradient(135deg, rgba(250, 119, 0, 0.08) 0%, rgba(23, 19, 19, 0.95) 55%)',
             border: '1px solid rgba(250, 119, 0, 0.15)',
           }}
         >

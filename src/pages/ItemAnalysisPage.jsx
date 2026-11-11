@@ -450,7 +450,7 @@ const ItemAnalysisPage = () => {
                         }
                         return [value, 'Units Sold'];
                       }}
-                      contentStyle={{ borderRadius: 8, border: '1px solid var(--ktr-line)', backgroundColor: '#FFFFFF' }}
+                      contentStyle={{ borderRadius: 8, border: '1px solid var(--ktr-line)', backgroundColor: '#1f1917' }}
                     />
                     <Legend />
                     <Bar yAxisId="left" dataKey="quantity" name="Units Sold" fill={brand.orange} radius={[4, 4, 0, 0]} />
@@ -491,7 +491,7 @@ const ItemAnalysisPage = () => {
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: 16,
-          background: 'linear-gradient(135deg, rgba(250, 119, 0, 0.08) 0%, rgba(255, 255, 255, 0.95) 55%)',
+          background: 'linear-gradient(135deg, rgba(250, 119, 0, 0.08) 0%, rgba(23, 19, 19, 0.95) 55%)',
           border: '1px solid rgba(250, 119, 0, 0.15)',
         }}
       >

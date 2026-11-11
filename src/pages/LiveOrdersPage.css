@@ -3,8 +3,8 @@
 .lo-kpi-label { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ktr-muted); }
 .lo-kpi-value { font-family: var(--ktr-font-display); font-weight: 800; font-size: 28px; line-height: 1.2; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ktr-ink); margin-top: 6px; }
 .lo-kpi-hint { font-size: 12px; color: var(--ktr-muted); }
-.lo-kpi.is-warn { border-color: var(--ktr-yellow); background: #fffaea; }
-.lo-kpi.is-late { border-color: #d9a3a3; background: #fbeeee; }
+.lo-kpi.is-warn { border-color: var(--ktr-yellow); background: rgba(255, 196, 31, 0.1); }
+.lo-kpi.is-late { border-color: rgba(255, 107, 94, 0.6); background: rgba(255, 107, 94, 0.12); }
 .lo-kpi.is-late .lo-kpi-value { color: var(--ktr-maroon); }
 
 .lo-status { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -18,15 +18,15 @@
 .lo-ticket-bar { height: 6px; background: var(--ktr-ok); }
 .lo-ticket.is-warn .lo-ticket-bar { background: var(--ktr-yellow); }
 .lo-ticket.is-late .lo-ticket-bar { background: var(--ktr-maroon); }
-.lo-ticket.is-late { border-color: #d9a3a3; }
+.lo-ticket.is-late { border-color: rgba(255, 107, 94, 0.6); }
 .lo-ticket-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 14px 16px 10px; }
 .lo-token { font-family: var(--ktr-font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.01em; color: var(--ktr-ink); line-height: 1.15; }
 .lo-type { display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 8px; background: var(--ktr-olive); color: #fff; }
 .lo-type.is-parcel { background: var(--ktr-wine); }
 .lo-age { text-align: right; flex: none; }
-.lo-age-value { font-family: var(--ktr-font-display); font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; padding: 4px 10px; border-radius: 10px; background: #e8f3e8; color: var(--ktr-ok); display: inline-block; }
-.lo-ticket.is-warn .lo-age-value { background: #fff1c2; color: #7a5a00; }
-.lo-ticket.is-late .lo-age-value { background: #f6dcdc; color: var(--ktr-maroon); }
+.lo-age-value { font-family: var(--ktr-font-display); font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; padding: 4px 10px; border-radius: 10px; background: rgba(143, 209, 106, 0.16); color: var(--ktr-ok); display: inline-block; }
+.lo-ticket.is-warn .lo-age-value { background: rgba(255, 196, 31, 0.18); color: var(--ktr-yellow); }
+.lo-ticket.is-late .lo-age-value { background: rgba(255, 107, 94, 0.18); color: var(--ktr-maroon); }
 .lo-age-label { font-size: 11px; color: var(--ktr-muted); margin-top: 3px; }
 .lo-lines { list-style: none; margin: 0; padding: 0 16px 14px; }
 .lo-line { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: baseline; padding: 9px 0; border-top: 1px dashed var(--ktr-line); }
@@ -37,8 +37,8 @@
 .lo-note { grid-column: 2 / -1; font-size: 12.5px; color: var(--ktr-wine); font-weight: 600; }
 .lo-tag { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 8px; white-space: nowrap; }
 .lo-tag.s-new { background: var(--ktr-peach); color: var(--ktr-ink-2); }
-.lo-tag.s-cooking { background: #fff1c2; color: #7a5a00; }
-.lo-tag.s-ready { background: #e8f3e8; color: var(--ktr-ok); }
+.lo-tag.s-cooking { background: rgba(255, 196, 31, 0.18); color: var(--ktr-yellow); }
+.lo-tag.s-ready { background: rgba(143, 209, 106, 0.16); color: var(--ktr-ok); }
 .lo-tag.s-done { background: var(--ktr-paper); color: var(--ktr-muted); }
 .lo-foot { margin-top: 16px; font-size: 12.5px; color: var(--ktr-muted); }
 
@@ -47,7 +47,7 @@
 .rn-title { font-family: var(--ktr-font-display); font-weight: 800; font-size: 14px; color: var(--ktr-ink); display: flex; align-items: center; gap: 8px; }
 .rn-item { display: flex; align-items: baseline; gap: 8px; }
 .rn-value { font-family: var(--ktr-font-display); font-weight: 800; font-size: 22px; font-variant-numeric: tabular-nums; color: var(--ktr-ink); }
-.rn-value.is-warn { color: #7a5a00; }
+.rn-value.is-warn { color: var(--ktr-yellow); }
 .rn-value.is-late { color: var(--ktr-maroon); }
 .rn-label { font-size: 13px; color: var(--ktr-muted); font-weight: 600; }
 .rn-link { margin-left: auto; font-weight: 800; color: var(--ktr-orange-ink); white-space: nowrap; }
